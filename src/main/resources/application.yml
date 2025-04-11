@@ -28,3 +28,12 @@ springdoc:
 
 server:
   port: 8080
+
+jwt:
+  secret-key: ${JWT_SECRET_KEY}
+  access-token-validity-seconds: 3600
+
+logging:
+  level:
+    org.springframework.boot.autoconfigure.jdbc: DEBUG
+    org.springframework.jdbc.datasource: DEBUG
