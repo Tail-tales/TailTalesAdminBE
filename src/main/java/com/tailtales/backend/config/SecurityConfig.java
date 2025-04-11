@@ -1,20 +1,45 @@
 package com.tailtales.backend.config;
 
+import com.tailtales.backend.auth.service.CustomUserDetailsService;
+import com.tailtales.backend.jwt.JwtFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder; // Import 추가
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.List;
 
 @Configuration
 public class SecurityConfig {
+
+    @Lazy
+    @Autowired
+    private JwtFilter jwtFilter;
+
+    @Lazy
+    @Autowired
+    private CustomUserDetailsService customUserDetailsService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        auth.userDetailsService(customUserDetailsService).passwordEncoder(passwordEncoder); // 주입받은 PasswordEncoder 사용
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -31,29 +56,16 @@ public class SecurityConfig {
                         })
                 )
                 .authorizeHttpRequests((auth) -> auth
-                        .anyRequest().authenticated()
+                        .requestMatchers("/login").permitAll() // 로그인 경로는 인증 없이 접근 허용
+                        .requestMatchers("/api/admins/**").authenticated() // "/admin/**" 경로는 인증 필요
+                        .anyRequest().permitAll() // 일단 모든 요청 허용 (추후 수정)
                 )
-                .formLogin(form -> form
-                        .loginProcessingUrl("/login") // 로그인 요청 처리 경로
-                        .permitAll());
+                .sessionManagement((sessionManagement) ->
+                        sessionManagement.sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS) // 세션 사용 안 함
+                )
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class) // JWT 필터 추가
+                .formLogin(form -> form.disable());
         return http.build();
-    }
-
-    @Bean
-    public UserDetailsService userDetailsService() {
-        UserDetails user = User
-                .withUsername("user")
-                .password(passwordEncoder().encode("1234"))
-                .roles("USER")
-                .build();
-        return new InMemoryUserDetailsManager(user);
-    }
-
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-
-        return new BCryptPasswordEncoder();
-
     }
 
 }
