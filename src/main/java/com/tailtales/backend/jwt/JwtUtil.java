@@ -6,7 +6,6 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -15,9 +14,6 @@ import java.util.Date;
 @Log4j2
 @Component
 public class JwtUtil {
-
-    @Autowired
-    private EnvConfig envConfig;
 
     private final Key accessKey;
     private final long accessTokenValidityInMilliseconds;
@@ -77,14 +73,14 @@ public class JwtUtil {
     }
 
     // Refresh JWT 토큰에서 Subject 추출 (필요한 경우)
-    public String getSubjectFromRefreshToken(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(refreshKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
-    }
+//    public String getSubjectFromRefreshToken(String token) {
+//        return Jwts.parserBuilder()
+//                .setSigningKey(refreshKey)
+//                .build()
+//                .parseClaimsJws(token)
+//                .getBody()
+//                .getSubject();
+//    }
 
     // JWT 토큰 유효성 검증 메서드
     public boolean validateAccessToken(String token) {
@@ -102,18 +98,18 @@ public class JwtUtil {
     }
 
     // Refresh JWT 토큰 유효성 검증 메서드
-    public boolean validateRefreshToken(String token) {
-        try {
-            Jwts.parserBuilder()
-                    .setSigningKey(refreshKey)
-                    .build()
-                    .parseClaimsJws(token);
-            return true;
-        } catch (Exception e) {
-            log.error("Invalid Refresh Token", e);
-            return false;
-        }
-    }
+//    public boolean validateRefreshToken(String token) {
+//        try {
+//            Jwts.parserBuilder()
+//                    .setSigningKey(refreshKey)
+//                    .build()
+//                    .parseClaimsJws(token);
+//            return true;
+//        } catch (Exception e) {
+//            log.error("Invalid Refresh Token", e);
+//            return false;
+//        }
+//    }
 
     // Access JWT 토큰 만료 시간 추출 메서드
     public long getExpirationTimeFromAccessToken(String token) {
