@@ -3,9 +3,9 @@ spring:
     name: backend
 
   datasource:
-    url: jdbc:mariadb://localhost:13306/${DBNAME}
-    username: ${USERNAME}
-    password: ${PASSWORD}
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
     driver-class-name: org.mariadb.jdbc.Driver
 
     hikari:
@@ -31,9 +31,14 @@ server:
 
 jwt:
   secret-key: ${JWT_SECRET_KEY}
+  refresh-secret-key: ${JWT_REFRESH_SECRET_KEY}
   access-token-validity-seconds: 3600
+  refresh-token-validity-seconds: 604800
+
 
 logging:
   level:
     org.springframework.boot.autoconfigure.jdbc: DEBUG
     org.springframework.jdbc.datasource: DEBUG
+#    org.springframework.beans.factory: DEBUG
+#    org.springframework.context.annotation: DEBUG
