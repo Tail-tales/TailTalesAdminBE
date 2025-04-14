@@ -36,8 +36,8 @@ public class JwtFilter extends OncePerRequestFilter {
         if (StringUtils.hasText(authHeader) && authHeader.startsWith("Bearer ")) {
             final String jwtToken = authHeader.substring(7); // "Bearer " 제외
 
-            if (jwtUtil.validateToken(jwtToken)) {
-                final String adminId = jwtUtil.getSubject(jwtToken);
+            if (jwtUtil.validateAccessToken(jwtToken)) {
+                final String adminId = jwtUtil.getSubjectFromAccessToken(jwtToken);
 
                 if (adminId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     UserDetails userDetails = this.customUserDetailsService.loadUserByUsername(adminId);
