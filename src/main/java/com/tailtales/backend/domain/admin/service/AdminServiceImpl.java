@@ -71,4 +71,16 @@ public class AdminServiceImpl implements AdminService {
 
     }
 
+    @Override
+    public void deleteAdmin(String adminId) {
+
+        Admin admin = adminRepository.findByAdminId(adminId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 관리자를 찾을 수 없습니다."));
+
+        admin = admin.toBuilder()
+                .isDeleted(true)
+                .build();
+        adminRepository.save(admin);
+
+    }
 }

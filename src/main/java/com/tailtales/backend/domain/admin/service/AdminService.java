@@ -13,4 +13,6 @@ public interface AdminService {
 
     void updateAdmin(String adminId, AdminUpdateRequestDto adminUpdateRequestDto);
 
+    void deleteAdmin(String adminId);
+
 }
