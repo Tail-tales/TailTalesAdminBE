@@ -1,11 +1,14 @@
 package com.tailtales.backend.domain.admin.controller;
 
 import com.tailtales.backend.domain.admin.dto.AdminCreateRequestDto;
+import com.tailtales.backend.domain.admin.dto.AdminUpdateRequestDto;
 import com.tailtales.backend.domain.admin.service.AdminService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -35,5 +38,16 @@ public class AdminController {
     public ResponseEntity<Boolean> checkDuplicateEmail(@RequestParam(name = "email") String email) {
         boolean isDuplicate = adminService.isDuplicateEmail(email);
         return ResponseEntity.ok(isDuplicate);
+    }
+
+    // 관리자 개인 정보 수정
+    @PutMapping("/me")
+    public ResponseEntity<String> updateAdmin(@RequestBody @Valid AdminUpdateRequestDto adminUpdateRequestDto,
+                                              @AuthenticationPrincipal UserDetails userDetails) {
+
+        String adminId = userDetails.getUsername();
+
+        adminService.updateAdmin(adminId, adminUpdateRequestDto);
+        return ResponseEntity.ok("관리자 정보 수정이 완료되었습니다.");
     }
 }

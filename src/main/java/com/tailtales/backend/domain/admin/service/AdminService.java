@@ -1,6 +1,7 @@
 package com.tailtales.backend.domain.admin.service;
 
 import com.tailtales.backend.domain.admin.dto.AdminCreateRequestDto;
+import com.tailtales.backend.domain.admin.dto.AdminUpdateRequestDto;
 
 public interface AdminService {
 
@@ -10,5 +11,6 @@ public interface AdminService {
 
     boolean isDuplicateEmail(String email);
 
+    void updateAdmin(String adminId, AdminUpdateRequestDto adminUpdateRequestDto);
 
 }

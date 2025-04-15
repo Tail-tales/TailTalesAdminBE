@@ -1,6 +1,7 @@
 package com.tailtales.backend.domain.admin.service;
 
 import com.tailtales.backend.domain.admin.dto.AdminCreateRequestDto;
+import com.tailtales.backend.domain.admin.dto.AdminUpdateRequestDto;
 import com.tailtales.backend.domain.admin.entity.Admin;
 import com.tailtales.backend.domain.admin.repository.AdminRepository;
 import lombok.RequiredArgsConstructor;
@@ -52,6 +53,22 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public boolean isDuplicateEmail(String email) {
         return adminRepository.existsByEmail(email);
+    }
+
+    @Override
+    public void updateAdmin(String adminId, AdminUpdateRequestDto dto) {
+
+        Admin admin = adminRepository.findByAdminId(adminId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 관리자를 찾을 수 없습니다."));
+
+        Admin updatedAdmin = admin.toBuilder()
+                .name(dto.getName())
+                .contact(dto.getContact())
+                .email(dto.getEmail())
+                .build();
+
+        adminRepository.save(updatedAdmin);
+
     }
 
 }
