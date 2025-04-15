@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -48,7 +49,7 @@ public class SecurityConfig {
                 .cors((cors) -> cors
                         .configurationSource(request -> {
                             CorsConfiguration configuration = new CorsConfiguration();
-                            configuration.setAllowedOrigins(List.of("*")); // 모든 Origin 허용 (운영 환경에서는 구체적인 Origin으로 설정해야 함)
+                            configuration.setAllowedOrigins(List.of("http://localhost:8081"));
                             configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                             configuration.setAllowedHeaders(List.of("*"));
                             configuration.setAllowCredentials(true); // 쿠키 허용 설정 (필요한 경우)
@@ -57,6 +58,9 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/login").permitAll() // 로그인 경로는 인증 없이 접근 허용
+                        .requestMatchers(HttpMethod.POST, "/api/admins").permitAll()
+                        .requestMatchers("/api/admins/check-id-duplication").permitAll()
+                        .requestMatchers("/api/admins/check-email").permitAll()
                         .requestMatchers("/api/admins/**").authenticated() // "/admin/**" 경로는 인증 필요
                         .anyRequest().permitAll() // 일단 모든 요청 허용 (추후 수정)
                 )
