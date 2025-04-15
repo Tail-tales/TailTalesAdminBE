@@ -16,7 +16,7 @@ public class AdminController {
 
     private final AdminService adminService;
 
-    // 관리자 등록
+    // 관리자 회원가입
     @PostMapping
     public ResponseEntity<String> insertAdmin(@RequestBody @Valid AdminCreateRequestDto adminCreateRequestDto) {
         adminService.insertAdmin(adminCreateRequestDto);

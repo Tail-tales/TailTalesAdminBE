@@ -18,4 +18,6 @@ public class AdminLoginResponseDto {
 
     private long refreshExpiresIn;
 
+    private String adminId;
+
 }

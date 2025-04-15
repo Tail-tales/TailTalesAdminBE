@@ -39,6 +39,7 @@ public class AuthService {
                     .refreshToken(refreshToken)
                     .expiresIn(accessTokenExpiresIn / 1000) // 초 단위로 변환
                     .refreshExpiresIn(refreshTokenExpiresIn / 1000) // 초 단위로 변환
+                    .adminId(adminId)
                     .build();
         }
 
