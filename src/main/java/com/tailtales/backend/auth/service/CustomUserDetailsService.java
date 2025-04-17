@@ -3,6 +3,7 @@ package com.tailtales.backend.auth.service;
 import com.tailtales.backend.domain.admin.entity.Admin;
 import com.tailtales.backend.domain.admin.repository.AdminRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -11,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -28,6 +30,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
         Admin admin = adminOptional.get();
 
-        return new User(admin.getAdminId(), admin.getPassword(), Collections.emptyList());
+        List<SimpleGrantedAuthority> authorities = Collections.emptyList();
+        return new User(admin.getAdminId(), admin.getPassword(), authorities);
     }
 }
