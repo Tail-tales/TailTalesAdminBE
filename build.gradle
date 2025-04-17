@@ -51,6 +51,9 @@ dependencies {
 
 //	env
 	implementation 'io.github.cdimascio:java-dotenv:5.2.2'
+
+//	smtp
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
 }
 
 tasks.named('test') {
