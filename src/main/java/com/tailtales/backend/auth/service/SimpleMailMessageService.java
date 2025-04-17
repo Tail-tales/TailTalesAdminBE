@@ -1,10 +1,12 @@
 package com.tailtales.backend.auth.service;
 
+import lombok.extern.log4j.Log4j2;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
 
+@Log4j2
 @Service
 public class SimpleMailMessageService {
 
@@ -29,8 +31,8 @@ public class SimpleMailMessageService {
             // 메일 보내기
             this.mailSender.send(msg);
             System.out.println("이메일 전송 성공!");
-        } catch (MailException e) {
-            throw e;
+        } catch (MailException error) {
+            log.error(error);
         }
     }
 
