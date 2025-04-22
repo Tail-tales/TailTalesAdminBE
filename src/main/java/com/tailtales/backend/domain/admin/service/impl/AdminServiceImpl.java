@@ -1,9 +1,10 @@
-package com.tailtales.backend.domain.admin.service;
+package com.tailtales.backend.domain.admin.service.impl;
 
 import com.tailtales.backend.domain.admin.dto.AdminCreateRequestDto;
 import com.tailtales.backend.domain.admin.dto.AdminUpdateRequestDto;
 import com.tailtales.backend.domain.admin.entity.Admin;
 import com.tailtales.backend.domain.admin.repository.AdminRepository;
+import com.tailtales.backend.domain.admin.service.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -56,7 +57,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public void updateAdmin(String adminId, AdminUpdateRequestDto dto) {
+    public void updateAdminInfo(String adminId, AdminUpdateRequestDto dto) {
 
         Admin admin = adminRepository.findByAdminId(adminId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 관리자를 찾을 수 없습니다."));

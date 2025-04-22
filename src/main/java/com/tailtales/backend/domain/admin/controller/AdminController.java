@@ -27,15 +27,15 @@ public class AdminController {
     }
 
     // 관리자 아이디 중복 체크
-    @GetMapping("/check-id-duplication")
-    public ResponseEntity<Boolean> checkDuplicateAdminId(@RequestParam(name = "adminId") String adminId) {
+    @GetMapping("/exists/{adminId}")
+    public ResponseEntity<Boolean> checkDuplicateAdminId(@PathVariable(name = "adminId") String adminId) {
         boolean isDuplicate = adminService.isDuplicateAdminId(adminId);
         return ResponseEntity.ok(isDuplicate);
     }
 
     // 이메일 중복 체크
-    @GetMapping("/check-email")
-    public ResponseEntity<Boolean> checkDuplicateEmail(@RequestParam(name = "email") String email) {
+    @GetMapping("/exists/{email}")
+    public ResponseEntity<Boolean> checkDuplicateEmail(@PathVariable(name = "email") String email) {
         boolean isDuplicate = adminService.isDuplicateEmail(email);
         return ResponseEntity.ok(isDuplicate);
     }
@@ -47,7 +47,7 @@ public class AdminController {
 
         String adminId = userDetails.getUsername();
 
-        adminService.updateAdmin(adminId, adminUpdateRequestDto);
+        adminService.updateAdminInfo(adminId, adminUpdateRequestDto);
         return ResponseEntity.ok("관리자 정보 수정이 완료되었습니다.");
     }
 
