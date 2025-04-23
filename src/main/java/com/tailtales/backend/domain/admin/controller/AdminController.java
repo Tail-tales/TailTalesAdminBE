@@ -33,13 +33,6 @@ public class AdminController {
         return ResponseEntity.ok(isDuplicate);
     }
 
-    // 이메일 중복 체크
-    @GetMapping("/exists/{email}")
-    public ResponseEntity<Boolean> checkDuplicateEmail(@PathVariable(name = "email") String email) {
-        boolean isDuplicate = adminService.isDuplicateEmail(email);
-        return ResponseEntity.ok(isDuplicate);
-    }
-
     // 관리자 개인 정보 수정
     @PutMapping("/me")
     public ResponseEntity<String> updateAdmin(@RequestBody @Valid AdminUpdateRequestDto adminUpdateRequestDto,

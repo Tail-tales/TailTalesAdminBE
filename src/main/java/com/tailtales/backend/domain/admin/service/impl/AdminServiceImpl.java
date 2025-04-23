@@ -52,11 +52,6 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public boolean isDuplicateEmail(String email) {
-        return adminRepository.existsByEmail(email);
-    }
-
-    @Override
     public void updateAdminInfo(String adminId, AdminUpdateRequestDto dto) {
 
         Admin admin = adminRepository.findByAdminId(adminId)

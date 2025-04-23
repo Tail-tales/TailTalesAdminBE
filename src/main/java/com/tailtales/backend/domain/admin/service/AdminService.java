@@ -9,8 +9,6 @@ public interface AdminService {
 
     boolean isDuplicateAdminId(String adminId);
 
-    boolean isDuplicateEmail(String email);
-
     void updateAdminInfo(String adminId, AdminUpdateRequestDto adminUpdateRequestDto);
 
     void deleteAdmin(String adminId);
