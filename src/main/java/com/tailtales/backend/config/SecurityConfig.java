@@ -59,8 +59,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/login").permitAll() // 로그인 경로는 인증 없이 접근 허용
                         .requestMatchers(HttpMethod.POST, "/api/admins").permitAll()
-                        .requestMatchers("/api/admins/check-id-duplication").permitAll()
-                        .requestMatchers("/api/admins/check-email").permitAll()
+                        .requestMatchers("/api/admins/exists/{adminId}").permitAll()
                         .requestMatchers("/api/admins/**").authenticated() // "/admin/**" 경로는 인증 필요
                         .anyRequest().permitAll() // 일단 모든 요청 허용 (추후 수정)
                 )
