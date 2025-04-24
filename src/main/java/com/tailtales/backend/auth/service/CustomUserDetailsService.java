@@ -19,6 +19,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
+    private static final String ADMIN_ROLE = "ADMIN";
+
     private final AdminRepository adminRepository;
     private final PasswordEncoder passwordEncoder; // PasswordEncoder만 주입
 
@@ -30,7 +32,12 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
         Admin admin = adminOptional.get();
 
-        List<SimpleGrantedAuthority> authorities = Collections.emptyList();
+        // 삭제된 사용자인지 확인
+        if (admin.isDeleted()) {
+            throw new UsernameNotFoundException("삭제된 계정입니다.");
+        }
+
+        List<SimpleGrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(ADMIN_ROLE));
         return new User(admin.getAdminId(), admin.getPassword(), authorities);
     }
 }
