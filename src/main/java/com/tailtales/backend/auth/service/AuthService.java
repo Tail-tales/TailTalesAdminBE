@@ -14,6 +14,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
@@ -27,6 +29,7 @@ public class AuthService {
     private final UserDetailsService userDetailsService;
     private final SimpleMailMessageService simpleMailMessageService;
     private final AdminRepository adminRepository;
+    private static final String ADMIN_ROLE = "ADMIN";
 
     public AdminLoginResponseDto login(String adminId, String password) {
 
@@ -38,7 +41,7 @@ public class AuthService {
         // 인증 성공 시 JWT 토큰 생성
         if (authentication.isAuthenticated()) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(adminId);
-            String accessToken = jwtUtil.generateAccessToken(userDetails.getUsername());
+            String accessToken = jwtUtil.generateAccessToken(userDetails.getUsername(), Map.of("roles", List.of(ADMIN_ROLE)));
             String refreshToken = jwtUtil.generateRefreshToken();
 
             long accessTokenExpiresIn = jwtUtil.getExpirationTimeFromAccessToken(accessToken);

@@ -22,15 +22,19 @@ public class AdminController {
     // 관리자 회원가입
     @PostMapping
     public ResponseEntity<String> insertAdmin(@RequestBody @Valid AdminCreateRequestDto adminCreateRequestDto) {
+
         adminService.insertAdmin(adminCreateRequestDto);
         return ResponseEntity.ok("관리자 등록이 완료되었습니다.");
+
     }
 
     // 관리자 아이디 중복 체크
     @GetMapping("/exists/{adminId}")
     public ResponseEntity<Boolean> checkDuplicateAdminId(@PathVariable(name = "adminId") String adminId) {
+
         boolean isDuplicate = adminService.isDuplicateAdminId(adminId);
         return ResponseEntity.ok(isDuplicate);
+
     }
 
     // 관리자 개인 정보 수정
@@ -39,16 +43,18 @@ public class AdminController {
                                               @AuthenticationPrincipal UserDetails userDetails) {
 
         String adminId = userDetails.getUsername();
-
         adminService.updateAdminInfo(adminId, adminUpdateRequestDto);
         return ResponseEntity.ok("관리자 정보 수정이 완료되었습니다.");
+
     }
 
     // 관리자 계정 삭제
     @DeleteMapping("/{adminId}")
     public ResponseEntity<String> deleteAdmin(@PathVariable String adminId) {
+
         adminService.deleteAdmin(adminId);
         return ResponseEntity.ok("관리자 계정이 삭제되었습니다.");
+
     }
 
 }

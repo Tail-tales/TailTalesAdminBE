@@ -1,22 +1,33 @@
 package com.tailtales.backend.jwt;
 
 import com.tailtales.backend.config.EnvConfig;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Log4j2
 @Component
 public class JwtUtil {
 
+    private static final String ADMIN_ROLE = "ADMIN";
+
+    @Getter
     private final Key accessKey;
     private final long accessTokenValidityInMilliseconds;
+
+    @Getter
     private final Key refreshKey;
     private final long refreshTokenValidityInMilliseconds;
 
@@ -38,17 +49,25 @@ public class JwtUtil {
     }
 
     // JWT 토큰 생성 메서드
-    public String generateAccessToken(String subject) {
+    public String generateAccessToken(String subject, Map<String, Object> claims) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + accessTokenValidityInMilliseconds);
 
+        Map<String, Object> allClaims = new HashMap<>(claims != null ? claims : Map.of());
+        allClaims.put("roles", List.of(ADMIN_ROLE));
+
         return Jwts.builder()
-                .setSubject(subject) // 토큰 제목 (일반적으로 사용자 ID)
-                .setIssuedAt(now) // 토큰 발급 시간
-                .setExpiration(expiryDate) // 토큰 만료 시간
-                .signWith(accessKey, SignatureAlgorithm.HS256) // 서명 알고리즘과 Key
+                .setClaims(allClaims)
+                .setSubject(subject)
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(accessKey, SignatureAlgorithm.HS256)
                 .compact();
     }
+
+//    public String generateAccessToken(String subject) {
+//        return generateAccessToken(subject, Map.of("roles", List.of(ADMIN_ROLE)));
+//    }
 
     // Refresh JWT 토큰 생성 메서드
     public String generateRefreshToken() {
@@ -97,6 +116,27 @@ public class JwtUtil {
         }
     }
 
+    public Claims getClaimsFromToken(String token) {
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(accessKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (Exception e) {
+            log.error("Failed to get claims from token", e);
+            return null;
+        }
+    }
+
+    // Authorization 헤더에서 토큰 추출 (관리자 서버에서는 필요 없을 수 있음)
+    public String extractTokenFromHeader(String authorizationHeader) {
+        if (StringUtils.hasText(authorizationHeader) && authorizationHeader.startsWith("Bearer ")) {
+            return authorizationHeader.substring(7);
+        }
+        return null;
+    }
+
     // Refresh JWT 토큰 유효성 검증 메서드
 //    public boolean validateRefreshToken(String token) {
 //        try {
@@ -113,13 +153,19 @@ public class JwtUtil {
 
     // Access JWT 토큰 만료 시간 추출 메서드
     public long getExpirationTimeFromAccessToken(String token) {
-        Date expiration = Jwts.parserBuilder()
-                .setSigningKey(accessKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getExpiration();
-        return expiration.getTime();
+        Claims claims = getClaimsFromToken(token);
+        if (claims != null) {
+            Date expiration = claims.getExpiration();
+            if (expiration != null) {
+                return expiration.getTime();
+            } else {
+                log.warn("Access token does not contain expiration time.");
+                return 0;
+            }
+        } else {
+            log.error("Failed to parse access token.");
+            return 0;
+        }
     }
 
     // Refresh JWT 토큰 만료 시간 추출 메서드
