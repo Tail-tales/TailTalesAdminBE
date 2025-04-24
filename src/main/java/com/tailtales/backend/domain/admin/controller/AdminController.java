@@ -50,7 +50,7 @@ public class AdminController {
 
     // 관리자 계정 삭제
     @DeleteMapping("/{adminId}")
-    public ResponseEntity<String> deleteAdmin(@PathVariable String adminId) {
+    public ResponseEntity<String> deleteAdmin(@PathVariable(name = "adminId") String adminId) {
 
         adminService.deleteAdmin(adminId);
         return ResponseEntity.ok("관리자 계정이 삭제되었습니다.");

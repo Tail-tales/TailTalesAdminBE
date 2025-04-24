@@ -28,8 +28,8 @@ public class UsersController {
     // 유저 개별 조회
     @GetMapping("/{provider}/{providerId}")
     public Mono<ResponseEntity<UsersResponseDto>> getUserByProviderId(
-            @PathVariable String provider,
-            @PathVariable String providerId,
+            @PathVariable(name = "provider") String provider,
+            @PathVariable(name = "providerId") String providerId,
             @RequestHeader("Authorization") String authorizationHeader) {
 
         String token = jwtUtil.extractTokenFromHeader(authorizationHeader);
@@ -60,8 +60,8 @@ public class UsersController {
     // 유저 삭제
     @DeleteMapping("/{provider}/{providerId}")
     public Mono<ResponseEntity<Void>> deleteUserByProviderId(
-            @PathVariable String provider,
-            @PathVariable String providerId,
+            @PathVariable(name = "provider") String provider,
+            @PathVariable(name = "providerId") String providerId,
             @RequestHeader("Authorization") String authorizationHeader) {
 
         String token = jwtUtil.extractTokenFromHeader(authorizationHeader);
