@@ -6,7 +6,8 @@ import reactor.core.publisher.Mono;
 
 public interface UsersService {
 
-    Mono<UsersResponseDto> getUserByProviderId(String provider, String providerId);
-    Flux<UsersResponseDto> getUsers();
+    Mono<UsersResponseDto> getUserByProviderId(String provider, String providerId, String token);
+    Flux<UsersResponseDto> getUsers(String token);
+    Mono<Void> deleteUserByProviderId(String provider, String providerId, String token);
 
 }

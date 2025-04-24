@@ -18,22 +18,35 @@ public class UsersServiceImpl implements UsersService {
         this.webClient = webClient;
     }
 
-    public Mono<UsersResponseDto> getUserByProviderId(String provider, String providerId) {
+    @Override
+    public Mono<UsersResponseDto> getUserByProviderId(String provider, String providerId, String token) {
 
         return webClient.get()
                 .uri("/api/users/{provider}/{providerId}", provider, providerId)
+                .headers(headers -> headers.setBearerAuth(token))
                 .retrieve()
                 .bodyToMono(UsersResponseDto.class);
 
     }
 
-    public Flux<UsersResponseDto> getUsers() {
+    @Override
+    public Flux<UsersResponseDto> getUsers(String token) {
 
         return webClient.get()
                 .uri("/api/users")
+                .headers(headers -> headers.setBearerAuth(token))
                 .retrieve()
                 .bodyToFlux(UsersResponseDto.class);
 
+    }
+
+    @Override
+    public Mono<Void> deleteUserByProviderId(String provider, String providerId, String token) {
+        return webClient.delete()
+                .uri("/api/users/{provider}/{providerId}", provider, providerId)
+                .headers(headers -> headers.setBearerAuth(token))
+                .retrieve()
+                .bodyToMono(Void.class);
     }
 
 }
