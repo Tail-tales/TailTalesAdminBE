@@ -16,8 +16,10 @@ import lombok.NoArgsConstructor;
 public class AdminUpdateRequestDto {
 
     @Size(max = 50)
-    @NotBlank
     private String name;
+
+    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()_+=-]).{8,20}$")
+    private String password;
 
     @Size(max = 20)
     @Pattern(regexp = "^01[0-9]\\d{7,8}$")
@@ -25,7 +27,6 @@ public class AdminUpdateRequestDto {
 
     @Size(max = 100)
     @Email
-    @NotBlank
     private String email;
 
 }
