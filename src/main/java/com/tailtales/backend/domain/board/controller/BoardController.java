@@ -2,10 +2,12 @@ package com.tailtales.backend.domain.board.controller;
 
 import com.tailtales.backend.domain.board.dto.BoardResponseDto;
 import com.tailtales.backend.domain.board.dto.BoardsResponseDto;
+import com.tailtales.backend.domain.board.dto.PostRequestDto;
 import com.tailtales.backend.domain.board.service.BoardService;
 import com.tailtales.backend.domain.common.dto.PageRequestDto;
 import com.tailtales.backend.domain.common.dto.PageResponseDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -49,6 +51,15 @@ public class BoardController {
         Optional<BoardResponseDto> response = boardService.getBoardInfo(bno);
 
         return response.map(boardResponseDto -> new ResponseEntity<>(boardResponseDto, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+
+    }
+
+    // 글 작성
+    @PostMapping
+    public ResponseEntity<Long> insertBoard(@Valid @RequestBody PostRequestDto postRequestDto) {
+
+        Long boardId = boardService.insertBoard(postRequestDto);
+        return new ResponseEntity<>(boardId, HttpStatus.CREATED);
 
     }
 
