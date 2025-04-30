@@ -138,18 +138,18 @@ public class JwtUtil {
     }
 
     // Refresh JWT 토큰 유효성 검증 메서드
-//    public boolean validateRefreshToken(String token) {
-//        try {
-//            Jwts.parserBuilder()
-//                    .setSigningKey(refreshKey)
-//                    .build()
-//                    .parseClaimsJws(token);
-//            return true;
-//        } catch (Exception e) {
-//            log.error("Invalid Refresh Token", e);
-//            return false;
-//        }
-//    }
+    public boolean validateRefreshToken(String token) {
+        try {
+            Jwts.parserBuilder()
+                    .setSigningKey(refreshKey)
+                    .build()
+                    .parseClaimsJws(token);
+            return true;
+        } catch (Exception e) {
+            log.error("Invalid Refresh Token", e);
+            return false;
+        }
+    }
 
     // Access JWT 토큰 만료 시간 추출 메서드
     public long getExpirationTimeFromAccessToken(String token) {

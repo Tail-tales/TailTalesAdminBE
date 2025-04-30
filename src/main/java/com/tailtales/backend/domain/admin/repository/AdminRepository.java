@@ -21,4 +21,8 @@ public interface AdminRepository extends JpaRepository<Admin, Integer> {
     @Query("SELECT a FROM Admin a WHERE a.adminId = :adminId AND a.isDeleted = false")
     Optional<Admin> findByAdminId(@Param("adminId") String adminId);
 
+    // refresh token 검증
+    @Query("SELECT a FROM Admin a WHERE a.refreshToken = :refreshToken AND a.isDeleted = false")
+    Optional<Admin> findByRefreshToken(@Param("refreshToken") String refreshToken);
+
 }

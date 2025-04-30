@@ -44,4 +44,7 @@ public class Admin {
     @Column(name = "is_deleted")
     private boolean isDeleted;
 
+    @Column(name = "refresh_token")
+    private String refreshToken;
+
 }

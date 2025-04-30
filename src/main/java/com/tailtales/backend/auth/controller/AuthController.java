@@ -24,17 +24,20 @@ public class AuthController {
     // 관리자 로그인
     @PostMapping("/login")
     public ResponseEntity<AdminLoginResponseDto> login(@RequestBody AdminLoginRequestDto requestDto) {
+
         AdminLoginResponseDto responseDto = authService.login(requestDto.getAdminId(), requestDto.getPassword());
         if (responseDto != null) {
             return ResponseEntity.ok(responseDto);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null); // Unauthorized (인증되지 않음)
         }
+
     }
 
     // 관리자 비밀번호 찾기
     @PostMapping("/findPassword")
     public ResponseEntity<String> findPassword(@RequestParam String adminId) {
+
         try {
             authService.sendMail(adminId);
             return ResponseEntity.ok("새로운 비밀번호를 해당 관리자의 이메일로 발송했습니다.");
@@ -44,6 +47,20 @@ public class AuthController {
             log.error(e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("새로운 비밀번호 발송에 실패했습니다.");
         }
+
+    }
+
+    // 토큰 갱신 요청
+    @PostMapping("/refresh")
+    public ResponseEntity<AdminLoginResponseDto> refreshAccessToken(String refreshToken) {
+
+        AdminLoginResponseDto responseDto = authService.refreshAccessToken(refreshToken);
+        if (responseDto != null) {
+            return ResponseEntity.ok(responseDto);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null); // Unauthorized (유효하지 않은 Refresh Token)
+        }
+
     }
 
 }
