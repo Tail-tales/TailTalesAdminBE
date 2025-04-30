@@ -57,8 +57,12 @@ public class Board {
             joinColumns = @JoinColumn(name = "bno"),
             inverseJoinColumns = @JoinColumn(name = "bcno")
     )
+    @Builder.Default
     private List<Category> categories = new ArrayList<>();
 
-
+    // 조회 수 증가
+    public void increaseViewCnt() {
+        this.viewCnt++;
+    }
 
 }

@@ -42,6 +42,7 @@ public class Category {
     private boolean isDeleted;
 
     @ManyToMany(mappedBy = "categories")
+    @Builder.Default
     private List<Board> boards = new ArrayList<>();
 
 }

@@ -1,13 +1,17 @@
 package com.tailtales.backend.domain.board.controller;
 
-import com.tailtales.backend.domain.board.dto.BoardListResponseDto;
+import com.tailtales.backend.domain.board.dto.BoardResponseDto;
+import com.tailtales.backend.domain.board.dto.BoardsResponseDto;
 import com.tailtales.backend.domain.board.service.BoardService;
 import com.tailtales.backend.domain.common.dto.PageRequestDto;
 import com.tailtales.backend.domain.common.dto.PageResponseDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,22 +23,32 @@ public class BoardController {
 
     // 전체 글 조회
     @GetMapping("/all")
-    public ResponseEntity<PageResponseDto<BoardListResponseDto>> getBoardList(
+    public ResponseEntity<PageResponseDto<BoardsResponseDto>> getBoardList(
             @ModelAttribute PageRequestDto pageRequestDto) {
 
-        PageResponseDto<BoardListResponseDto> response = boardService.getBoardList(pageRequestDto);
+        PageResponseDto<BoardsResponseDto> response = boardService.getBoardList(pageRequestDto);
         return ResponseEntity.ok().body(response);
 
     }
 
     // 카테고리별 글 조회
     @GetMapping("/category/{categoryId}")
-    public ResponseEntity<PageResponseDto<BoardListResponseDto>> getBoardList(
+    public ResponseEntity<PageResponseDto<BoardsResponseDto>> getBoardList(
             @PathVariable(name = "categoryId") int categoryId,
             @ModelAttribute PageRequestDto pageRequestDto) {
 
-        PageResponseDto<BoardListResponseDto> response = boardService.getBoardList(categoryId, pageRequestDto);
+        PageResponseDto<BoardsResponseDto> response = boardService.getBoardList(categoryId, pageRequestDto);
         return ResponseEntity.ok().body(response);
+
+    }
+
+    // 개별 글 조회
+    @GetMapping("/{bno}")
+    public ResponseEntity<BoardResponseDto> getBoardInfo(@PathVariable("bno") long bno) {
+
+        Optional<BoardResponseDto> response = boardService.getBoardInfo(bno);
+
+        return response.map(boardResponseDto -> new ResponseEntity<>(boardResponseDto, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
 
     }
 

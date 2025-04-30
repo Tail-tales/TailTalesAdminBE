@@ -61,7 +61,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/admins").permitAll() // 회원가입
                         .requestMatchers("/api/admins/exists/id/{adminId}").permitAll() // 회원가입 시 아이디 중복 체크
                         .requestMatchers("/api/admins/exists/email/{email}").permitAll() // 회원가입 시 이메일 중복 체크
-                        .requestMatchers("/api/admins/**").authenticated() // "/admin/**" 경로는 인증 필요
+                        .requestMatchers("/api/admins/**").authenticated() // "/admins/**" 경로는 인증 필요
+                        .requestMatchers("/api/admin/**").authenticated() // "/admin/**" 경로는 인증 필요
                         .anyRequest().permitAll() // 일단 모든 요청 허용 (추후 수정)
                 )
                 .sessionManagement((sessionManagement) ->

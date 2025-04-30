@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BoardListResponseDto {
+public class BoardsResponseDto {
 
     private String title;
 
