@@ -58,8 +58,9 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/login").permitAll() // 로그인 경로는 인증 없이 접근 허용
-                        .requestMatchers(HttpMethod.POST, "/api/admins").permitAll()
-                        .requestMatchers("/api/admins/exists/{adminId}").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/admins").permitAll() // 회원가입
+                        .requestMatchers("/api/admins/exists/id/{adminId}").permitAll() // 회원가입 시 아이디 중복 체크
+                        .requestMatchers("/api/admins/exists/email/{email}").permitAll() // 회원가입 시 이메일 중복 체크
                         .requestMatchers("/api/admins/**").authenticated() // "/admin/**" 경로는 인증 필요
                         .anyRequest().permitAll() // 일단 모든 요청 허용 (추후 수정)
                 )
