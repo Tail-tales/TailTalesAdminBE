@@ -1,11 +1,13 @@
 package com.tailtales.backend.domain.admin.controller;
 
 import com.tailtales.backend.domain.admin.dto.AdminCreateRequestDto;
+import com.tailtales.backend.domain.admin.dto.AdminResponseDto;
 import com.tailtales.backend.domain.admin.dto.AdminUpdateRequestDto;
 import com.tailtales.backend.domain.admin.service.AdminService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -42,6 +44,21 @@ public class AdminController {
     public ResponseEntity<Boolean> checkDuplicateEmail(@PathVariable(name = "email") String email) {
         boolean isDuplicate = adminService.isDuplicateEmail(email);
         return ResponseEntity.ok(isDuplicate);
+    }
+
+    // 관리자 정보 조회(자신의 정보만 조회 가능)
+    @GetMapping("/{adminId}")
+    public ResponseEntity<AdminResponseDto> getAdminInfo(@PathVariable(name = "adminId") String adminId,
+                                                         @AuthenticationPrincipal UserDetails userDetails) {
+
+        String loggedInAdminId = userDetails.getUsername();
+        if (!loggedInAdminId.equals(adminId)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN); // 접근 거부 (403 Forbidden)
+        }
+
+        AdminResponseDto adminResponseDto = adminService.getAdminInfo(adminId);
+        return ResponseEntity.ok(adminResponseDto);
+
     }
 
     // 관리자 개인 정보 수정
