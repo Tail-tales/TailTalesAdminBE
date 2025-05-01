@@ -11,13 +11,13 @@ import java.util.Optional;
 
 public interface BoardService {
 
+    Long insertBoard(BoardRequestDto boardRequestDto);
+
     PageResponseDto<BoardsResponseDto> getBoardList(PageRequestDto pageRequestDto);
 
     PageResponseDto<BoardsResponseDto> getBoardList(int categoryId, PageRequestDto pageRequestDto);
 
     Optional<BoardResponseDto> getBoardInfo(long bno);
-
-    Long insertBoard(BoardRequestDto boardRequestDto);
 
     Optional<BoardResponseDto> updateBoard(BoardUpdateRequestDto boardUpdateRequestDto);
 
