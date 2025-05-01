@@ -2,6 +2,7 @@ package com.tailtales.backend.domain.category.service.impl;
 
 import com.tailtales.backend.domain.category.dto.CategoriesResponseDto;
 import com.tailtales.backend.domain.category.dto.CategoryRequestDto;
+import com.tailtales.backend.domain.category.dto.CategoryUpdateRequestDto;
 import com.tailtales.backend.domain.category.entity.Category;
 import com.tailtales.backend.domain.category.repository.CategoryRepository;
 import com.tailtales.backend.domain.category.service.CategoryService;
@@ -57,6 +58,49 @@ public class CategoryServiceImpl implements CategoryService {
                         .build())
                 .collect(Collectors.toList());
 
+    }
+
+    @Override
+    public Integer updateCategory(Integer bcno, CategoryUpdateRequestDto categoryUpdateRequestDto) {
+
+        Category existingCategory = categoryRepository.findByBcnoAndIsNotDeleted(bcno)
+                .orElseThrow(() -> new IllegalArgumentException("삭제되었거나 존재하지 않는 카테고리 ID입니다."));
+
+        Category.CategoryBuilder updatedCategoryBuilder = existingCategory.toBuilder()
+                .name(categoryUpdateRequestDto.getName());
+
+        if (categoryUpdateRequestDto.getParentBcno() != null) {
+            // 새로운 부모 카테고리 조회 및 예외 처리
+            Category parentCategory = categoryRepository.findById(categoryUpdateRequestDto.getParentBcno())
+                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 부모 카테고리 ID입니다."));
+            updatedCategoryBuilder.parent(parentCategory)
+                    .depth(parentCategory.getDepth() + 1);
+        } else {
+            updatedCategoryBuilder.parent(null)
+                    .depth(0); // 최상위 카테고리로 변경
+        }
+
+        // 업데이트된 카테고리 저장
+        Category updatedCategory = categoryRepository.save(updatedCategoryBuilder.build());
+
+        // 수정된 카테고리 ID 반환
+        return updatedCategory.getBcno();
+
+    }
+
+    @Override
+    public Integer deleteCategory(Integer bcno) {
+
+        Category existingCategory = categoryRepository.findByBcnoAndIsNotDeleted(bcno)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리 입니다. bcno: " + bcno));
+
+        Category deletedCategory = existingCategory.toBuilder()
+                .isDeleted(true)
+                .build();
+
+        categoryRepository.save(deletedCategory);
+
+        return bcno;
     }
 
 }
