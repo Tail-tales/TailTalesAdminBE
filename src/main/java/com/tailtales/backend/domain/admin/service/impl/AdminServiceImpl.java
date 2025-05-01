@@ -76,23 +76,29 @@ public class AdminServiceImpl implements AdminService {
         Admin admin = adminRepository.findByAdminId(adminId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 관리자를 찾을 수 없습니다."));
 
-
         Admin.AdminBuilder adminBuilder = admin.toBuilder();
+        boolean changed = false;
 
-        if (dto.getName() != null) {
+        if (dto.getName() != null && !admin.getName().equals(dto.getName())) {
             adminBuilder.name(dto.getName());
+            changed = true;
         }
-        if (dto.getPassword() != null) {
+        if (dto.getPassword() != null && !passwordEncoder.matches(dto.getPassword(), admin.getPassword())) {
             adminBuilder.password(passwordEncoder.encode(dto.getPassword()));
+            changed = true;
         }
-        if (dto.getContact() != null) {
+        if (dto.getContact() != null && !admin.getContact().equals(dto.getContact())) {
             adminBuilder.contact(dto.getContact());
+            changed = true;
         }
-        if (dto.getEmail() != null) {
+        if (dto.getEmail() != null && !admin.getEmail().equals(dto.getEmail())) {
             adminBuilder.email(dto.getEmail());
+            changed = true;
         }
 
-        adminRepository.save(adminBuilder.build());
+        if (changed) {
+            adminRepository.save(adminBuilder.build());
+        }
 
     }
 
