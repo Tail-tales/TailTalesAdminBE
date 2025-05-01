@@ -21,4 +21,6 @@ public interface BoardService {
 
     Optional<BoardResponseDto> updateBoard(BoardUpdateRequestDto boardUpdateRequestDto);
 
+    void deleteBoard(long bno);
+
 }

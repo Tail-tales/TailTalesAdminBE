@@ -76,4 +76,13 @@ public class BoardController {
         }
     }
 
+    // 글 삭제
+    @DeleteMapping("/{bno}")
+    public ResponseEntity<?> deleteBoard(@PathVariable("bno") long bno) {
+
+        boardService.deleteBoard(bno);
+        return new ResponseEntity<>("게시글이 성공적으로 삭제되었습니다.", HttpStatus.OK);
+
+    }
+
 }

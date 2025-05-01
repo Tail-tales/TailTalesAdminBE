@@ -161,4 +161,25 @@ public class BoardServiceImpl implements BoardService {
 
     }
 
+    @Override
+    public void deleteBoard(long bno) {
+
+        Admin currentAdmin = getAuthenticatedAdmin();
+
+        // 삭제할 게시글 조회
+        Board existingBoard = boardRepository.findByBnoAndIsNotDeleted(bno)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다. bno: " + bno));
+
+        if (!existingBoard.getAdmin().getAdminId().equals(currentAdmin.getAdminId())) {
+            throw new IllegalArgumentException("자신이 작성한 게시글만 삭제할 수 있습니다.");
+        }
+
+        Board deletedBoard = existingBoard.toBuilder()
+                .isDeleted(true)
+                .build();
+
+        boardRepository.save(deletedBoard);
+
+    }
+
 }
