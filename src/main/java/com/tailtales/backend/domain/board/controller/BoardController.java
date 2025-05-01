@@ -1,8 +1,9 @@
 package com.tailtales.backend.domain.board.controller;
 
 import com.tailtales.backend.domain.board.dto.BoardResponseDto;
+import com.tailtales.backend.domain.board.dto.BoardUpdateRequestDto;
 import com.tailtales.backend.domain.board.dto.BoardsResponseDto;
-import com.tailtales.backend.domain.board.dto.PostRequestDto;
+import com.tailtales.backend.domain.board.dto.BoardRequestDto;
 import com.tailtales.backend.domain.board.service.BoardService;
 import com.tailtales.backend.domain.common.dto.PageRequestDto;
 import com.tailtales.backend.domain.common.dto.PageResponseDto;
@@ -56,11 +57,23 @@ public class BoardController {
 
     // 글 작성
     @PostMapping
-    public ResponseEntity<Long> insertBoard(@Valid @RequestBody PostRequestDto postRequestDto) {
+    public ResponseEntity<Long> insertBoard(@Valid @RequestBody BoardRequestDto boardRequestDto) {
 
-        Long boardId = boardService.insertBoard(postRequestDto);
+        Long boardId = boardService.insertBoard(boardRequestDto);
         return new ResponseEntity<>(boardId, HttpStatus.CREATED);
 
+    }
+
+    // 글 수정
+    @PutMapping("/edit")
+    public ResponseEntity<?> updateBoard(@Valid @RequestBody BoardUpdateRequestDto boardUpdateRequestDto) {
+        Optional<BoardResponseDto> updatedBoardOptional = boardService.updateBoard(boardUpdateRequestDto);
+
+        if (updatedBoardOptional.isPresent()) {
+            return new ResponseEntity<>(updatedBoardOptional.get(), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("게시글 수정에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR); // 또는 다른 적절한 상태 코드
+        }
     }
 
 }

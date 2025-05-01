@@ -1,7 +1,8 @@
 package com.tailtales.backend.domain.board.service;
 
 import com.tailtales.backend.domain.board.dto.BoardResponseDto;
-import com.tailtales.backend.domain.board.dto.PostRequestDto;
+import com.tailtales.backend.domain.board.dto.BoardRequestDto;
+import com.tailtales.backend.domain.board.dto.BoardUpdateRequestDto;
 import com.tailtales.backend.domain.board.dto.BoardsResponseDto;
 import com.tailtales.backend.domain.common.dto.PageRequestDto;
 import com.tailtales.backend.domain.common.dto.PageResponseDto;
@@ -16,6 +17,8 @@ public interface BoardService {
 
     Optional<BoardResponseDto> getBoardInfo(long bno);
 
-    Long insertBoard(PostRequestDto postRequestDto);
+    Long insertBoard(BoardRequestDto boardRequestDto);
+
+    Optional<BoardResponseDto> updateBoard(BoardUpdateRequestDto boardUpdateRequestDto);
 
 }

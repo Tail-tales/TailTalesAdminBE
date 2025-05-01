@@ -1,30 +1,21 @@
 package com.tailtales.backend.domain.board.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BoardResponseDto {
+public class BoardRequestDto {
 
-    private long bno;
-
+    @NotBlank
     private String title;
 
-    private String name;
-
+    @NotBlank
     private String content;
-
-    private int viewCnt;
-
-    private LocalDateTime createdAt;
-
-    private LocalDateTime updatedAt;
 
 }

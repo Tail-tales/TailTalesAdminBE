@@ -3,8 +3,9 @@ package com.tailtales.backend.domain.board.service.impl;
 import com.tailtales.backend.domain.admin.entity.Admin;
 import com.tailtales.backend.domain.admin.repository.AdminRepository;
 import com.tailtales.backend.domain.board.dto.BoardResponseDto;
+import com.tailtales.backend.domain.board.dto.BoardUpdateRequestDto;
 import com.tailtales.backend.domain.board.dto.BoardsResponseDto;
-import com.tailtales.backend.domain.board.dto.PostRequestDto;
+import com.tailtales.backend.domain.board.dto.BoardRequestDto;
 import com.tailtales.backend.domain.board.entity.Board;
 import com.tailtales.backend.domain.board.repository.BoardRepository;
 import com.tailtales.backend.domain.common.dto.PageRequestDto;
@@ -21,6 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -89,24 +91,27 @@ public class BoardServiceImpl implements BoardService {
 
     }
 
-    @Override
-    public Long insertBoard(PostRequestDto postRequestDto) {
-
+    // 관리자 확인 로직
+    private Admin getAuthenticatedAdmin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        Admin currentAdmin;
-
-        if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof UserDetails) {
-            String adminId = ((UserDetails) authentication.getPrincipal()).getUsername();
-            currentAdmin = adminRepository.findByAdminId(adminId)
-                    .orElseThrow(() -> new RuntimeException("현재 로그인한 관리자 정보를 찾을 수 없습니다."));
-        } else {
-            throw new RuntimeException("인증된 관리자 정보를 찾을 수 없습니다.");
+        if (authentication == null || !authentication.isAuthenticated() || !(authentication.getPrincipal() instanceof UserDetails userDetails)) {
+            throw new RuntimeException("인증되지 않은 사용자입니다.");
         }
 
+        String currentAdminId = userDetails.getUsername();
+        return adminRepository.findByAdminId(currentAdminId)
+                .orElseThrow(() -> new RuntimeException("현재 로그인한 관리자 정보를 찾을 수 없습니다."));
+    }
+
+    @Override
+    public Long insertBoard(BoardRequestDto boardRequestDto) {
+
+        Admin currentAdmin = getAuthenticatedAdmin();
+
         Board board = Board.builder()
-                .title(postRequestDto.getTitle())
-                .content(postRequestDto.getContent())
+                .title(boardRequestDto.getTitle())
+                .content(boardRequestDto.getContent())
                 .admin(currentAdmin)
                 .viewCnt(0)
                 .isDeleted(false)
@@ -114,6 +119,45 @@ public class BoardServiceImpl implements BoardService {
 
         Board savedBoard = boardRepository.save(board);
         return savedBoard.getBno();
+
+    }
+
+    @Override
+    public Optional<BoardResponseDto> updateBoard(BoardUpdateRequestDto boardUpdateRequestDto) {
+
+        Admin currentAdmin = getAuthenticatedAdmin();
+
+        // 수정할 게시글 조회
+        Board existingBoard = boardRepository.findByBnoAndIsNotDeleted(boardUpdateRequestDto.getBno())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다. bno: " + boardUpdateRequestDto.getBno()));
+
+        if (!existingBoard.getAdmin().getAdminId().equals(currentAdmin.getAdminId())) {
+            throw new IllegalArgumentException("자신이 작성한 게시글만 수정할 수 있습니다.");
+        }
+
+        // 기존 게시글 정보를 바탕으로 새로운 Board 객체 생성 (toBuilder 사용)
+        Board updatedBoard = existingBoard.toBuilder()
+                .bno(existingBoard.getBno()) // 기존 bno 명시적으로 설정
+                .title(boardUpdateRequestDto.getTitle())
+                .content(boardUpdateRequestDto.getContent())
+                .updatedAt(LocalDateTime.now()) // 수정 시간 업데이트
+                .build();
+
+        // 업데이트된 게시글 저장
+        Board savedBoard = boardRepository.save(updatedBoard);
+
+        // 수정된 게시글 정보를 담은 BoardResponseDto 생성 및 반환
+        BoardResponseDto responseDto = BoardResponseDto.builder()
+                .bno(savedBoard.getBno())
+                .title(savedBoard.getTitle())
+                .name(existingBoard.getAdmin().getAdminId()) // 기존 작성자 유지
+                .content(savedBoard.getContent())
+                .viewCnt(savedBoard.getViewCnt())
+                .createdAt(savedBoard.getCreatedAt())
+                .updatedAt(savedBoard.getUpdatedAt())
+                .build();
+
+        return Optional.of(responseDto);
 
     }
 

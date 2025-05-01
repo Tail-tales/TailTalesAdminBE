@@ -10,7 +10,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostRequestDto {
+public class BoardUpdateRequestDto {
+
+    private long bno;
 
     @NotBlank
     private String title;
