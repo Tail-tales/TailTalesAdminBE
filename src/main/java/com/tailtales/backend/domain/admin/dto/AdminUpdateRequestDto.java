@@ -20,7 +20,6 @@ public class AdminUpdateRequestDto {
     private String name;
 
     @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()_+=-]).{8,20}$")
-    @NotBlank
     private String password;
 
     @Size(max = 20)
