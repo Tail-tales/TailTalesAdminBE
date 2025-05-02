@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface BoardRepository extends JpaRepository<Board, Long> {
@@ -17,8 +18,8 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
     Page<Board> findAllNotDeletedOrderByCreatedAtDesc(Pageable pageable);
 
     // 카테고리 필터링 조회
-    @Query("SELECT b FROM Board b JOIN b.categories c WHERE b.isDeleted = false AND c.bcno = :categoryId ORDER BY b.createdAt DESC")
-    Page<Board> findAllNotDeletedByCategoryOrderByCreatedAtDesc(@Param("categoryId") int categoryId, Pageable pageable);
+    @Query("SELECT b FROM Board b JOIN b.categories c WHERE b.isDeleted = false AND c.bcno IN :categoryIds ORDER BY b.createdAt DESC")
+    Page<Board> findAllNotDeletedByCategoriesOrderByCreatedAtDesc(@Param("categoryIds") List<Integer> categoryIds, Pageable pageable);
 
     // 개별 글 조회
     @Query("SELECT b FROM Board b WHERE b.bno = :bno AND b.isDeleted = false")

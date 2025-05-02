@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Getter
 @Builder
 @NoArgsConstructor
@@ -19,5 +21,8 @@ public class BoardUpdateRequestDto {
 
     @NotBlank
     private String content;
+
+    // 유효성 검사 추가 할지 말지
+    private List<String> categories;
 
 }

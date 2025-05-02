@@ -8,6 +8,8 @@ import com.tailtales.backend.domain.board.dto.BoardsResponseDto;
 import com.tailtales.backend.domain.board.dto.BoardRequestDto;
 import com.tailtales.backend.domain.board.entity.Board;
 import com.tailtales.backend.domain.board.repository.BoardRepository;
+import com.tailtales.backend.domain.category.entity.Category;
+import com.tailtales.backend.domain.category.repository.CategoryRepository;
 import com.tailtales.backend.domain.common.dto.PageRequestDto;
 import com.tailtales.backend.domain.common.dto.PageResponseDto;
 import com.tailtales.backend.domain.board.service.BoardService;
@@ -23,6 +25,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -34,6 +37,7 @@ public class BoardServiceImpl implements BoardService {
 
     private final AdminRepository adminRepository;
     private final BoardRepository boardRepository;
+    private final CategoryRepository categoryRepository;
 
     @Override
     public PageResponseDto<BoardsResponseDto> getBoardList(PageRequestDto pageRequestDto) {
@@ -46,23 +50,36 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    public PageResponseDto<BoardsResponseDto> getBoardList(int categoryId, PageRequestDto pageRequestDto) {
+    public PageResponseDto<BoardsResponseDto> getBoardList(List<Integer> categoryIds, PageRequestDto pageRequestDto) {
 
         Pageable pageable = PageRequest.of(pageRequestDto.getPage() - 1, pageRequestDto.getSize(), Sort.by("createdAt").descending());
 
-        Page<Board> result = boardRepository.findAllNotDeletedByCategoryOrderByCreatedAtDesc(categoryId, pageable);
+        Page<Board> result;
+
+        if (categoryIds != null && (!categoryIds.isEmpty())) {
+            result = boardRepository.findAllNotDeletedByCategoriesOrderByCreatedAtDesc(categoryIds, pageable);
+        } else {
+            result = boardRepository.findAllNotDeletedOrderByCreatedAtDesc(pageable);
+        }
 
         return pageEntityToDto(pageRequestDto, result);
     }
 
     private PageResponseDto<BoardsResponseDto> pageEntityToDto(PageRequestDto pageRequestDto, Page<Board> result) {
         List<BoardsResponseDto> dtoList = result.getContent().stream()
-                .map(board -> BoardsResponseDto.builder()
-                        .title(board.getTitle())
-                        .name(board.getAdmin() != null ? board.getAdmin().getAdminId() : null)
-                        .viewCnt(board.getViewCnt())
-                        .createdAt(board.getCreatedAt())
-                        .build())
+                .map(board -> {
+                    List<String> categoryNames = board.getCategories().stream()
+                            .map(Category::getName)
+                            .toList();
+
+                    return BoardsResponseDto.builder()
+                            .title(board.getTitle())
+                            .name(board.getAdmin() != null ? board.getAdmin().getAdminId() : null)
+                            .viewCnt(board.getViewCnt())
+                            .createdAt(board.getCreatedAt())
+                            .categories(categoryNames)
+                            .build();
+                })
                 .collect(Collectors.toList());
 
         return PageResponseDto.<BoardsResponseDto>withAll()
@@ -79,6 +96,12 @@ public class BoardServiceImpl implements BoardService {
 
         return boardInfo.map(board -> {
             board.increaseViewCnt(); // 조회수 증가
+            boardRepository.save(board); // 조회수 업데이트
+
+            List<String> categoryNames = board.getCategories().stream()
+                    .map(Category::getName)
+                    .toList();
+
             return BoardResponseDto.builder()
                     .bno(board.getBno())
                     .title(board.getTitle())
@@ -86,6 +109,7 @@ public class BoardServiceImpl implements BoardService {
                     .content(board.getContent())
                     .viewCnt(board.getViewCnt())
                     .createdAt(board.getCreatedAt())
+                    .categories(categoryNames)
                     .build();
         });
 
@@ -117,6 +141,17 @@ public class BoardServiceImpl implements BoardService {
                 .isDeleted(false)
                 .build();
 
+        List<Category> categories = new ArrayList<>();
+        if (boardRequestDto.getCategories() != null && !boardRequestDto.getCategories().isEmpty()) {
+            for (String categoryName : boardRequestDto.getCategories()) {
+                // 해당 이름의 삭제되지 않은 카테고리가 존재하는지 조회
+                Category category = categoryRepository.findByNameAndIsDeletedFalse(categoryName)
+                        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다: " + categoryName));
+                categories.add(category);
+            }
+        }
+        board.getCategories().addAll(categories); // 게시글과 카테고리 연결
+
         Board savedBoard = boardRepository.save(board);
         return savedBoard.getBno();
 
@@ -135,26 +170,41 @@ public class BoardServiceImpl implements BoardService {
             throw new IllegalArgumentException("자신이 작성한 게시글만 수정할 수 있습니다.");
         }
 
-        // 기존 게시글 정보를 바탕으로 새로운 Board 객체 생성 (toBuilder 사용)
+        // 업데이트할 카테고리 목록 생성
+        List<Category> updatedCategories = new ArrayList<>();
+        if (boardUpdateRequestDto.getCategories() != null && !boardUpdateRequestDto.getCategories().isEmpty()) {
+            for (String categoryName : boardUpdateRequestDto.getCategories()) {
+                Category category = categoryRepository.findByNameAndIsDeletedFalse(categoryName)
+                        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다: " + categoryName));
+                updatedCategories.add(category);
+            }
+        }
+
+        // 기존 게시글 정보를 기반으로 업데이트된 Board 객체 생성
         Board updatedBoard = existingBoard.toBuilder()
-                .bno(existingBoard.getBno()) // 기존 bno 명시적으로 설정
                 .title(boardUpdateRequestDto.getTitle())
                 .content(boardUpdateRequestDto.getContent())
-                .updatedAt(LocalDateTime.now()) // 수정 시간 업데이트
+                .updatedAt(LocalDateTime.now())
+                .categories(updatedCategories)
                 .build();
 
         // 업데이트된 게시글 저장
         Board savedBoard = boardRepository.save(updatedBoard);
 
+        List<String> savedCategoryNames = savedBoard.getCategories().stream()
+                .map(Category::getName)
+                .toList();
+
         // 수정된 게시글 정보를 담은 BoardResponseDto 생성 및 반환
         BoardResponseDto responseDto = BoardResponseDto.builder()
                 .bno(savedBoard.getBno())
                 .title(savedBoard.getTitle())
-                .name(existingBoard.getAdmin().getAdminId()) // 기존 작성자 유지
+                .name(existingBoard.getAdmin().getAdminId())
                 .content(savedBoard.getContent())
                 .viewCnt(savedBoard.getViewCnt())
                 .createdAt(savedBoard.getCreatedAt())
                 .updatedAt(savedBoard.getUpdatedAt())
+                .categories(savedCategoryNames)
                 .build();
 
         return Optional.of(responseDto);

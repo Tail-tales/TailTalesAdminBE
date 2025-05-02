@@ -7,6 +7,7 @@ import com.tailtales.backend.domain.board.dto.BoardsResponseDto;
 import com.tailtales.backend.domain.common.dto.PageRequestDto;
 import com.tailtales.backend.domain.common.dto.PageResponseDto;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface BoardService {
@@ -15,7 +16,7 @@ public interface BoardService {
 
     PageResponseDto<BoardsResponseDto> getBoardList(PageRequestDto pageRequestDto);
 
-    PageResponseDto<BoardsResponseDto> getBoardList(int categoryId, PageRequestDto pageRequestDto);
+    PageResponseDto<BoardsResponseDto> getBoardList(List<Integer> categoryIds, PageRequestDto pageRequestDto);
 
     Optional<BoardResponseDto> getBoardInfo(long bno);
 

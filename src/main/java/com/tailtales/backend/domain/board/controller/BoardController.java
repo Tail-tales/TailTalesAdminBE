@@ -12,12 +12,15 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/api/admin/boards")
 @Tag(name = "Board", description = "Board API")
 public class BoardController {
@@ -35,12 +38,12 @@ public class BoardController {
     }
 
     // 카테고리별 글 조회
-    @GetMapping("/category/{categoryId}")
-    public ResponseEntity<PageResponseDto<BoardsResponseDto>> getBoardList(
-            @PathVariable(name = "categoryId") int categoryId,
+    @GetMapping("/category")
+    public ResponseEntity<PageResponseDto<BoardsResponseDto>> getBoardsByCategory(
+            @RequestParam(name = "categoryIds") List<Integer> categoryIds,
             @ModelAttribute PageRequestDto pageRequestDto) {
 
-        PageResponseDto<BoardsResponseDto> response = boardService.getBoardList(categoryId, pageRequestDto);
+        PageResponseDto<BoardsResponseDto> response = boardService.getBoardList(categoryIds, pageRequestDto);
         return ResponseEntity.ok().body(response);
 
     }
