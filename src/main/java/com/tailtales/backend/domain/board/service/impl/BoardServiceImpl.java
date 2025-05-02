@@ -40,26 +40,68 @@ public class BoardServiceImpl implements BoardService {
     private final CategoryRepository categoryRepository;
 
     @Override
-    public PageResponseDto<BoardsResponseDto> getBoardList(PageRequestDto pageRequestDto) {
-
-        Pageable pageable = PageRequest.of(pageRequestDto.getPage() - 1, pageRequestDto.getSize(), Sort.by("createdAt").descending());
-
-        Page<Board> result = boardRepository.findAllNotDeletedOrderByCreatedAtDesc(pageable);
-
-        return pageEntityToDto(pageRequestDto, result);
-    }
-
-    @Override
-    public PageResponseDto<BoardsResponseDto> getBoardList(List<Integer> categoryIds, PageRequestDto pageRequestDto) {
+    public PageResponseDto<BoardsResponseDto> getBoardList(String sort, PageRequestDto pageRequestDto) {
 
         Pageable pageable = PageRequest.of(pageRequestDto.getPage() - 1, pageRequestDto.getSize(), Sort.by("createdAt").descending());
 
         Page<Board> result;
 
+        // 정렬 방식 설정
+        Sort sortCondition = Sort.by("createdAt").descending(); // 기본은 최신순
+        if (sort.equalsIgnoreCase("oldest")) {
+            sortCondition = Sort.by("createdAt").ascending();
+        } else if (sort.equalsIgnoreCase("views")) {
+            sortCondition = Sort.by("viewCnt").descending();
+        }
+
+        Pageable updatedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortCondition);
+
+        boardRepository.findAllNotDeletedOrderByCreatedAtDesc(updatedPageable);
+
+        if (sort.equalsIgnoreCase("oldest")) {
+            result = boardRepository.findAllNotDeletedOrderByCreatedAtAsc(updatedPageable);
+        } else if (sort.equalsIgnoreCase("views")) {
+            result = boardRepository.findAllNotDeletedOrderByViewCntDesc(updatedPageable);
+        } else { // 기본은 최신순
+            result = boardRepository.findAllNotDeletedOrderByCreatedAtDesc(updatedPageable);
+        }
+
+        return pageEntityToDto(pageRequestDto, result);
+    }
+
+    @Override
+    public PageResponseDto<BoardsResponseDto> getBoardList(String sort, List<Integer> categoryIds, PageRequestDto pageRequestDto) {
+
+        Pageable pageable = PageRequest.of(pageRequestDto.getPage() - 1, pageRequestDto.getSize(), Sort.by("createdAt").descending());
+
+        // 정렬 방식 설정
+        Sort sortCondition = Sort.by("createdAt").descending();
+        if (sort != null) {
+            if (sort.equalsIgnoreCase("oldest")) {
+                sortCondition = Sort.by("createdAt").ascending();
+            } else if (sort.equalsIgnoreCase("views")) {
+                sortCondition = Sort.by("viewCnt").descending();
+            }
+        }
+
+        Pageable updatedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortCondition);
+
+        Page<Board> result;
+
         if (categoryIds != null && (!categoryIds.isEmpty())) {
-            result = boardRepository.findAllNotDeletedByCategoriesOrderByCreatedAtDesc(categoryIds, pageable);
+            if (sort != null) {
+                if (sort.equalsIgnoreCase("oldest")) {
+                    result = boardRepository.findAllNotDeletedByCategoriesOrderByCreatedAtAsc(categoryIds, updatedPageable);
+                } else if (sort.equalsIgnoreCase("views")) {
+                    result = boardRepository.findAllNotDeletedByCategoriesOrderByViewCntDesc(categoryIds, updatedPageable);
+                } else { // 기본 정렬: 최신순
+                    result = boardRepository.findAllNotDeletedByCategoriesOrderByCreatedAtDesc(categoryIds, updatedPageable);
+                }
+            } else { // sort 파라미터가 없는 경우 기본 최신순 정렬
+                result = boardRepository.findAllNotDeletedByCategoriesOrderByCreatedAtDesc(categoryIds, updatedPageable);
+            }
         } else {
-            result = boardRepository.findAllNotDeletedOrderByCreatedAtDesc(pageable);
+            result = boardRepository.findAllNotDeletedOrderByCreatedAtDesc(updatedPageable);
         }
 
         return pageEntityToDto(pageRequestDto, result);

@@ -14,9 +14,9 @@ public interface BoardService {
 
     Long insertBoard(BoardRequestDto boardRequestDto);
 
-    PageResponseDto<BoardsResponseDto> getBoardList(PageRequestDto pageRequestDto);
+    PageResponseDto<BoardsResponseDto> getBoardList(String sort, PageRequestDto pageRequestDto);
 
-    PageResponseDto<BoardsResponseDto> getBoardList(List<Integer> categoryIds, PageRequestDto pageRequestDto);
+    PageResponseDto<BoardsResponseDto> getBoardList(String sort, List<Integer> categoryIds, PageRequestDto pageRequestDto);
 
     Optional<BoardResponseDto> getBoardInfo(long bno);
 

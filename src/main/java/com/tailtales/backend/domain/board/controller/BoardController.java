@@ -30,9 +30,10 @@ public class BoardController {
     // 전체 글 조회
     @GetMapping("/all")
     public ResponseEntity<PageResponseDto<BoardsResponseDto>> getBoardList(
+            @RequestParam(required = false) String sort,
             @ModelAttribute PageRequestDto pageRequestDto) {
 
-        PageResponseDto<BoardsResponseDto> response = boardService.getBoardList(pageRequestDto);
+        PageResponseDto<BoardsResponseDto> response = boardService.getBoardList(sort, pageRequestDto);
         return ResponseEntity.ok().body(response);
 
     }
@@ -41,9 +42,10 @@ public class BoardController {
     @GetMapping("/category")
     public ResponseEntity<PageResponseDto<BoardsResponseDto>> getBoardsByCategory(
             @RequestParam(name = "categoryIds") List<Integer> categoryIds,
+            @RequestParam(required = false) String sort,
             @ModelAttribute PageRequestDto pageRequestDto) {
 
-        PageResponseDto<BoardsResponseDto> response = boardService.getBoardList(categoryIds, pageRequestDto);
+        PageResponseDto<BoardsResponseDto> response = boardService.getBoardList(sort, categoryIds, pageRequestDto);
         return ResponseEntity.ok().body(response);
 
     }
