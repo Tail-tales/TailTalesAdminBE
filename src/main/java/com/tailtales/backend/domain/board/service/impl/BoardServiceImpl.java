@@ -44,26 +44,25 @@ public class BoardServiceImpl implements BoardService {
 
         Pageable pageable = PageRequest.of(pageRequestDto.getPage() - 1, pageRequestDto.getSize(), Sort.by("createdAt").descending());
 
-        Page<Board> result;
+        Page<Board> result = boardRepository.findAllNotDeletedOrderByCreatedAtDesc(pageable);
 
         // 정렬 방식 설정
         Sort sortCondition = Sort.by("createdAt").descending(); // 기본은 최신순
-        if (sort.equalsIgnoreCase("oldest")) {
-            sortCondition = Sort.by("createdAt").ascending();
-        } else if (sort.equalsIgnoreCase("views")) {
-            sortCondition = Sort.by("viewCnt").descending();
-        }
 
-        Pageable updatedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortCondition);
+        if (sort != null) {
+            if (sort.equalsIgnoreCase("oldest")) {
+                sortCondition = Sort.by("createdAt").ascending();
+            } else if (sort.equalsIgnoreCase("views")) {
+                sortCondition = Sort.by("viewCnt").descending();
+            }
+            Pageable updatedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortCondition);
 
-        boardRepository.findAllNotDeletedOrderByCreatedAtDesc(updatedPageable);
+            if (sort.equalsIgnoreCase("oldest")) {
+                result = boardRepository.findAllNotDeletedOrderByCreatedAtAsc(updatedPageable);
+            } else if (sort.equalsIgnoreCase("views")) {
+                result = boardRepository.findAllNotDeletedOrderByViewCntDesc(updatedPageable);
+            }
 
-        if (sort.equalsIgnoreCase("oldest")) {
-            result = boardRepository.findAllNotDeletedOrderByCreatedAtAsc(updatedPageable);
-        } else if (sort.equalsIgnoreCase("views")) {
-            result = boardRepository.findAllNotDeletedOrderByViewCntDesc(updatedPageable);
-        } else { // 기본은 최신순
-            result = boardRepository.findAllNotDeletedOrderByCreatedAtDesc(updatedPageable);
         }
 
         return pageEntityToDto(pageRequestDto, result);
