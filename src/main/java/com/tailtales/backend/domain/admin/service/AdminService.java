@@ -1,21 +1,18 @@
 package com.tailtales.backend.domain.admin.service;
 
-import com.tailtales.backend.domain.admin.dto.AdminCreateRequestDto;
+import com.tailtales.backend.domain.admin.dto.AdminInsertRequestDto;
 import com.tailtales.backend.domain.admin.dto.AdminResponseDto;
 import com.tailtales.backend.domain.admin.dto.AdminUpdateRequestDto;
+import reactor.core.publisher.Mono;
 
 public interface AdminService {
 
-    void insertAdmin(AdminCreateRequestDto adminCreateRequestDto);
+    Mono<String> insertAdmin(AdminInsertRequestDto requestDto);
 
-    boolean isDuplicateAdminId(String adminId);
+    Mono<AdminResponseDto> getAdminInfo(String id, String adminAccessToken);
 
-    boolean isDuplicateEmail(String email);
+    Mono<String> updateAdminInfo(AdminUpdateRequestDto requestDto, String adminAccessToken);
 
-    AdminResponseDto getAdminInfo(String adminId);
-
-    void updateAdminInfo(String adminId, AdminUpdateRequestDto adminUpdateRequestDto);
-
-    void deleteAdmin(String adminId);
+    Mono<String> deleteAdmin(String id, String adminAccessToken);
 
 }

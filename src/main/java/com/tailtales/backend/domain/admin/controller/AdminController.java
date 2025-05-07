@@ -1,17 +1,14 @@
 package com.tailtales.backend.domain.admin.controller;
 
-import com.tailtales.backend.domain.admin.dto.AdminCreateRequestDto;
+import com.tailtales.backend.domain.admin.dto.AdminInsertRequestDto;
 import com.tailtales.backend.domain.admin.dto.AdminResponseDto;
 import com.tailtales.backend.domain.admin.dto.AdminUpdateRequestDto;
 import com.tailtales.backend.domain.admin.service.AdminService;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,64 +18,35 @@ public class AdminController {
 
     private final AdminService adminService;
 
-    // 관리자 회원가입
+    // 관리자 회원가입 요청
     @PostMapping
-    public ResponseEntity<String> insertAdmin(@RequestBody @Valid AdminCreateRequestDto adminCreateRequestDto) {
-
-        adminService.insertAdmin(adminCreateRequestDto);
-        return ResponseEntity.ok("관리자 등록이 완료되었습니다.");
-
+    public Mono<ResponseEntity<String>> signupAdmin(@RequestBody AdminInsertRequestDto requestDto) {
+        return adminService.insertAdmin(requestDto)
+                .map(ResponseEntity::ok);
     }
 
-    // 관리자 아이디 중복 체크
-    @GetMapping("/exists/id/{adminId}")
-    public ResponseEntity<Boolean> checkDuplicateAdminId(@PathVariable(name = "adminId") String adminId) {
-
-        boolean isDuplicate = adminService.isDuplicateAdminId(adminId);
-        return ResponseEntity.ok(isDuplicate);
-
+    // 특정 관리자 정보 조회 요청
+    @GetMapping("/{id}")
+    public Mono<ResponseEntity<AdminResponseDto>> getAdminInfo(@PathVariable(name = "id") String id,
+                                                               @RequestHeader("Authorization") String adminAccessToken) {
+        return adminService.getAdminInfo(id, adminAccessToken)
+                .map(ResponseEntity::ok);
     }
 
-    // 이메일 중복 체크
-    @GetMapping("/exists/email/{email}")
-    public ResponseEntity<Boolean> checkDuplicateEmail(@PathVariable(name = "email") String email) {
-        boolean isDuplicate = adminService.isDuplicateEmail(email);
-        return ResponseEntity.ok(isDuplicate);
-    }
-
-    // 관리자 정보 조회(자신의 정보만 조회 가능)
-    @GetMapping("/{adminId}")
-    public ResponseEntity<AdminResponseDto> getAdminInfo(@PathVariable(name = "adminId") String adminId,
-                                                         @AuthenticationPrincipal UserDetails userDetails) {
-
-        String loggedInAdminId = userDetails.getUsername();
-        if (!loggedInAdminId.equals(adminId)) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN); // 접근 거부 (403 Forbidden)
-        }
-
-        AdminResponseDto adminResponseDto = adminService.getAdminInfo(adminId);
-        return ResponseEntity.ok(adminResponseDto);
-
-    }
-
-    // 관리자 개인 정보 수정
+    // 특정 관리자 정보 수정 요청
     @PutMapping("/me")
-    public ResponseEntity<String> updateAdmin(@RequestBody @Valid AdminUpdateRequestDto adminUpdateRequestDto,
-                                              @AuthenticationPrincipal UserDetails userDetails) {
-
-        String adminId = userDetails.getUsername();
-        adminService.updateAdminInfo(adminId, adminUpdateRequestDto);
-        return ResponseEntity.ok("관리자 정보 수정이 완료되었습니다.");
-
+    public Mono<ResponseEntity<String>> updateAdminInfo(@RequestBody AdminUpdateRequestDto requestDto,
+                                                        @RequestHeader("Authorization") String adminAccessToken) {
+        return adminService.updateAdminInfo(requestDto, adminAccessToken)
+                .map(ResponseEntity::ok);
     }
 
-    // 관리자 계정 삭제
-    @DeleteMapping("/{adminId}")
-    public ResponseEntity<String> deleteAdmin(@PathVariable(name = "adminId") String adminId) {
-
-        adminService.deleteAdmin(adminId);
-        return ResponseEntity.ok("관리자 계정이 삭제되었습니다.");
-
+    // 특정 관리자 삭제 요청
+    @DeleteMapping("/{id}")
+    public Mono<ResponseEntity<String>> deleteAdmin(@PathVariable(name = "id") String id,
+                                                    @RequestHeader("Authorization") String adminAccessToken) {
+        return adminService.deleteAdmin(id, adminAccessToken)
+                .map(ResponseEntity::ok);
     }
 
 }

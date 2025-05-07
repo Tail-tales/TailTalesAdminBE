@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class AdminResponseDto {
 
     private String name;
-    private String adminId;
+    private String id;
     private String password;
     private String email;
     private String contact;

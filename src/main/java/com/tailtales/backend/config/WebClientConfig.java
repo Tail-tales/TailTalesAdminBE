@@ -13,6 +13,20 @@ import reactor.netty.http.client.HttpClient;
 public class WebClientConfig {
 
     @Bean
+    public WebClient authWebClient() {
+
+        HttpClient httpClient = HttpClient.create()
+                .wiretap(true);
+
+        return WebClient.builder()
+                .baseUrl("http://localhost:8083")
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
+                .build();
+
+    }
+
+    @Bean
     public WebClient customWebClient() {
 
         HttpClient httpClient = HttpClient.create()

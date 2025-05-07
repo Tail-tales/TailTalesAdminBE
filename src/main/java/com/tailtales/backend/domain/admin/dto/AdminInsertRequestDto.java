@@ -12,13 +12,13 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AdminCreateRequestDto {
+public class AdminInsertRequestDto {
 
     @NotBlank
     private String name;
 
     @NotBlank
-    private String adminId;
+    private String id;
 
     @NotBlank
     @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()_+=-]).{8,20}$")
