@@ -1,6 +1,7 @@
 package com.tailtales.backend.domain.category.service.impl;
 
 import com.tailtales.backend.domain.admin.service.AdminService;
+import com.tailtales.backend.domain.category.dto.CategoryChangeRequestDto;
 import com.tailtales.backend.domain.category.dto.CategoriesResponseDto;
 import com.tailtales.backend.domain.category.dto.CategoryRequestDto;
 import com.tailtales.backend.domain.category.dto.CategoryUpdateRequestDto;
@@ -21,6 +22,40 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final AdminService adminService;
     private final CategoryRepository categoryRepository;
+
+    @Override
+    public void updateCategoryChanges(List<CategoryChangeRequestDto> categoryChangeRequestDto, String adminAccessToken) {
+        adminService.verifyToken(adminAccessToken).block();
+
+        for (CategoryChangeRequestDto requestDto : categoryChangeRequestDto) {
+            switch (requestDto.getOperationType()) {
+                case "CREATE":
+                    insertCategory(
+                            CategoryRequestDto.builder()
+                                    .name(requestDto.getName())
+                                    .parentBcno(requestDto.getParentBcno())
+                                    .build(),
+                            adminAccessToken // 이미 토큰 검증 완료되었으므로 다시 전달해도 무방
+                    );
+                    break;
+                case "UPDATE":
+                    updateCategory(
+                            requestDto.getBcno(),
+                            CategoryUpdateRequestDto.builder()
+                                    .name(requestDto.getName())
+                                    .parentBcno(requestDto.getParentBcno())
+                                    .build(),
+                            adminAccessToken // 이미 토큰 검증 완료되었으므로 다시 전달해도 무방
+                    );
+                    break;
+                case "DELETE":
+                    deleteCategory(requestDto.getBcno(), adminAccessToken);
+                    break;
+                default:
+                    throw new IllegalArgumentException("지원하지 않는 작업 유형입니다: " + requestDto.getOperationType());
+            }
+        }
+    }
 
     @Override
     public Integer insertCategory(CategoryRequestDto categoryRequestDto, String adminAccessToken) {

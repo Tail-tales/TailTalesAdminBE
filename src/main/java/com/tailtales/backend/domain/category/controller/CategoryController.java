@@ -1,5 +1,6 @@
 package com.tailtales.backend.domain.category.controller;
 
+import com.tailtales.backend.domain.category.dto.CategoryChangeRequestDto;
 import com.tailtales.backend.domain.category.dto.CategoriesResponseDto;
 import com.tailtales.backend.domain.category.dto.CategoryRequestDto;
 import com.tailtales.backend.domain.category.dto.CategoryUpdateRequestDto;
@@ -20,6 +21,14 @@ import java.util.List;
 public class CategoryController {
 
     private final CategoryService categoryService;
+
+    @PostMapping("/changes")
+    public ResponseEntity<Void> updateCategoryChanges(
+            @RequestBody List<CategoryChangeRequestDto> categoryChangeRequestDto,
+            @RequestHeader("Authorization") String adminAccessToken) {
+        categoryService.updateCategoryChanges(categoryChangeRequestDto, adminAccessToken);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
     // 카테고리 생성
     @PostMapping
