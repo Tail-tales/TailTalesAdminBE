@@ -22,6 +22,6 @@ public class BoardRequestDto {
     private String content;
 
     @NotEmpty
-    private List<String> categories;
+    private List<Integer> categories;
 
 }

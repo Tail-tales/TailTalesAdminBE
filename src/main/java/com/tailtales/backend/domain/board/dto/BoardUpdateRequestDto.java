@@ -23,6 +23,6 @@ public class BoardUpdateRequestDto {
     private String content;
 
     // 유효성 검사 추가 할지 말지
-    private List<String> categories;
+    private List<Integer> categories;
 
 }

@@ -174,10 +174,10 @@ public class BoardServiceImpl implements BoardService {
 
         List<Category> categories = new ArrayList<>();
         if (boardRequestDto.getCategories() != null && !boardRequestDto.getCategories().isEmpty()) {
-            for (String categoryName : boardRequestDto.getCategories()) {
-                // 해당 이름의 삭제되지 않은 카테고리가 존재하는지 조회
-                Category category = categoryRepository.findByNameAndIsDeletedFalse(categoryName)
-                        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다: " + categoryName));
+            for (Integer bcno : boardRequestDto.getCategories()) {
+                // 해당 bcno의 삭제되지 않은 카테고리가 존재하는지 조회
+                Category category = categoryRepository.findByBcnoAndIsNotDeleted(bcno)
+                        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다: " + bcno));
                 categories.add(category);
             }
         }
@@ -205,9 +205,9 @@ public class BoardServiceImpl implements BoardService {
         // 업데이트할 카테고리 목록 생성
         List<Category> updatedCategories = new ArrayList<>();
         if (boardUpdateRequestDto.getCategories() != null && !boardUpdateRequestDto.getCategories().isEmpty()) {
-            for (String categoryName : boardUpdateRequestDto.getCategories()) {
-                Category category = categoryRepository.findByNameAndIsDeletedFalse(categoryName)
-                        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다: " + categoryName));
+            for (Integer bcno : boardUpdateRequestDto.getCategories()) {
+                Category category = categoryRepository.findByBcnoAndIsNotDeleted(bcno)
+                        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다: " + bcno));
                 updatedCategories.add(category);
             }
         }
