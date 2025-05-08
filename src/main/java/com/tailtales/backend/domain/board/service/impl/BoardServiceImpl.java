@@ -1,7 +1,6 @@
 package com.tailtales.backend.domain.board.service.impl;
 
-import com.tailtales.backend.domain.admin.entity.Admin;
-import com.tailtales.backend.domain.admin.repository.AdminRepository;
+import com.tailtales.backend.domain.admin.service.AdminService;
 import com.tailtales.backend.domain.board.dto.BoardResponseDto;
 import com.tailtales.backend.domain.board.dto.BoardUpdateRequestDto;
 import com.tailtales.backend.domain.board.dto.BoardsResponseDto;
@@ -19,9 +18,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -35,12 +31,14 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class BoardServiceImpl implements BoardService {
 
-    private final AdminRepository adminRepository;
+    private final AdminService adminService;
     private final BoardRepository boardRepository;
     private final CategoryRepository categoryRepository;
 
     @Override
-    public PageResponseDto<BoardsResponseDto> getBoardList(String sort, PageRequestDto pageRequestDto) {
+    public PageResponseDto<BoardsResponseDto> getBoardList(String sort, PageRequestDto pageRequestDto, String adminAccessToken) {
+
+        adminService.verifyToken(adminAccessToken).block();
 
         Pageable pageable = PageRequest.of(pageRequestDto.getPage() - 1, pageRequestDto.getSize(), Sort.by("createdAt").descending());
 
@@ -69,7 +67,9 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    public PageResponseDto<BoardsResponseDto> getBoardList(String sort, List<Integer> categoryIds, PageRequestDto pageRequestDto) {
+    public PageResponseDto<BoardsResponseDto> getBoardList(String sort, List<Integer> categoryIds, PageRequestDto pageRequestDto, String adminAccessToken) {
+
+        adminService.verifyToken(adminAccessToken).block();
 
         Pageable pageable = PageRequest.of(pageRequestDto.getPage() - 1, pageRequestDto.getSize(), Sort.by("createdAt").descending());
 
@@ -115,7 +115,7 @@ public class BoardServiceImpl implements BoardService {
 
                     return BoardsResponseDto.builder()
                             .title(board.getTitle())
-                            .name(board.getAdmin() != null ? board.getAdmin().getAdminId() : null)
+                            .name(board.getMemberId())
                             .viewCnt(board.getViewCnt())
                             .createdAt(board.getCreatedAt())
                             .categories(categoryNames)
@@ -131,7 +131,9 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    public Optional<BoardResponseDto> getBoardInfo(long bno) {
+    public Optional<BoardResponseDto> getBoardInfo(long bno, String adminAccessToken) {
+
+        adminService.verifyToken(adminAccessToken).block();
 
         Optional<Board> boardInfo = boardRepository.findByBnoAndIsNotDeleted(bno);
 
@@ -146,7 +148,7 @@ public class BoardServiceImpl implements BoardService {
             return BoardResponseDto.builder()
                     .bno(board.getBno())
                     .title(board.getTitle())
-                    .name(board.getAdmin() != null ? board.getAdmin().getAdminId() : null)
+                    .name(board.getMemberId())
                     .content(board.getContent())
                     .viewCnt(board.getViewCnt())
                     .createdAt(board.getCreatedAt())
@@ -156,28 +158,16 @@ public class BoardServiceImpl implements BoardService {
 
     }
 
-    // 관리자 확인 로직
-    private Admin getAuthenticatedAdmin() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated() || !(authentication.getPrincipal() instanceof UserDetails userDetails)) {
-            throw new RuntimeException("인증되지 않은 사용자입니다.");
-        }
-
-        String currentAdminId = userDetails.getUsername();
-        return adminRepository.findByAdminId(currentAdminId)
-                .orElseThrow(() -> new RuntimeException("현재 로그인한 관리자 정보를 찾을 수 없습니다."));
-    }
-
     @Override
-    public Long insertBoard(BoardRequestDto boardRequestDto) {
+    public Long insertBoard(BoardRequestDto boardRequestDto, String adminAccessToken) {
 
-        Admin currentAdmin = getAuthenticatedAdmin();
+        String memberId = adminService.verifyToken(adminAccessToken)
+                .block();
 
         Board board = Board.builder()
                 .title(boardRequestDto.getTitle())
                 .content(boardRequestDto.getContent())
-                .admin(currentAdmin)
+                .memberId(memberId)
                 .viewCnt(0)
                 .isDeleted(false)
                 .build();
@@ -199,15 +189,16 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    public Optional<BoardResponseDto> updateBoard(BoardUpdateRequestDto boardUpdateRequestDto) {
+    public Optional<BoardResponseDto> updateBoard(BoardUpdateRequestDto boardUpdateRequestDto, String adminAccessToken) {
 
-        Admin currentAdmin = getAuthenticatedAdmin();
+        String memberId = adminService.verifyToken(adminAccessToken)
+                .block();
 
         // 수정할 게시글 조회
         Board existingBoard = boardRepository.findByBnoAndIsNotDeleted(boardUpdateRequestDto.getBno())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다. bno: " + boardUpdateRequestDto.getBno()));
 
-        if (!existingBoard.getAdmin().getAdminId().equals(currentAdmin.getAdminId())) {
+        if (!existingBoard.getMemberId().equals(memberId)) {
             throw new IllegalArgumentException("자신이 작성한 게시글만 수정할 수 있습니다.");
         }
 
@@ -240,7 +231,7 @@ public class BoardServiceImpl implements BoardService {
         BoardResponseDto responseDto = BoardResponseDto.builder()
                 .bno(savedBoard.getBno())
                 .title(savedBoard.getTitle())
-                .name(existingBoard.getAdmin().getAdminId())
+                .name(savedBoard.getMemberId())
                 .content(savedBoard.getContent())
                 .viewCnt(savedBoard.getViewCnt())
                 .createdAt(savedBoard.getCreatedAt())
@@ -253,15 +244,16 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    public void deleteBoard(long bno) {
+    public void deleteBoard(long bno, String adminAccessToken) {
 
-        Admin currentAdmin = getAuthenticatedAdmin();
+        String memberId = adminService.verifyToken(adminAccessToken)
+                .block();
 
         // 삭제할 게시글 조회
         Board existingBoard = boardRepository.findByBnoAndIsNotDeleted(bno)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다. bno: " + bno));
 
-        if (!existingBoard.getAdmin().getAdminId().equals(currentAdmin.getAdminId())) {
+        if (!existingBoard.getMemberId().equals(memberId)) {
             throw new IllegalArgumentException("자신이 작성한 게시글만 삭제할 수 있습니다.");
         }
 

@@ -7,6 +7,8 @@ import reactor.core.publisher.Mono;
 
 public interface AdminService {
 
+    Mono<String> verifyToken(String adminAccessToken);
+
     Mono<String> insertAdmin(AdminInsertRequestDto requestDto);
 
     Mono<AdminResponseDto> getAdminInfo(String id, String adminAccessToken);

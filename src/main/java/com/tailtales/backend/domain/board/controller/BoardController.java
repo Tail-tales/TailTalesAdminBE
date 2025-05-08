@@ -29,9 +29,10 @@ public class BoardController {
     @GetMapping("/all")
     public ResponseEntity<PageResponseDto<BoardsResponseDto>> getBoardList(
             @RequestParam(required = false) String sort,
-            @ModelAttribute PageRequestDto pageRequestDto) {
+            @ModelAttribute PageRequestDto pageRequestDto,
+            @RequestHeader("Authorization") String adminAccessToken) {
 
-        PageResponseDto<BoardsResponseDto> response = boardService.getBoardList(sort, pageRequestDto);
+        PageResponseDto<BoardsResponseDto> response = boardService.getBoardList(sort, pageRequestDto, adminAccessToken);
         return ResponseEntity.ok().body(response);
 
     }
@@ -41,18 +42,20 @@ public class BoardController {
     public ResponseEntity<PageResponseDto<BoardsResponseDto>> getBoardsByCategory(
             @RequestParam(name = "categoryIds") List<Integer> categoryIds,
             @RequestParam(required = false) String sort,
-            @ModelAttribute PageRequestDto pageRequestDto) {
+            @ModelAttribute PageRequestDto pageRequestDto,
+            @RequestHeader("Authorization") String adminAccessToken) {
 
-        PageResponseDto<BoardsResponseDto> response = boardService.getBoardList(sort, categoryIds, pageRequestDto);
+        PageResponseDto<BoardsResponseDto> response = boardService.getBoardList(sort, categoryIds, pageRequestDto, adminAccessToken);
         return ResponseEntity.ok().body(response);
 
     }
 
     // 개별 글 조회
     @GetMapping("/{bno}")
-    public ResponseEntity<BoardResponseDto> getBoardInfo(@PathVariable("bno") long bno) {
+    public ResponseEntity<BoardResponseDto> getBoardInfo(@PathVariable("bno") long bno,
+                                                         @RequestHeader("Authorization") String adminAccessToken) {
 
-        Optional<BoardResponseDto> response = boardService.getBoardInfo(bno);
+        Optional<BoardResponseDto> response = boardService.getBoardInfo(bno, adminAccessToken);
 
         return response.map(boardResponseDto -> new ResponseEntity<>(boardResponseDto, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
 
@@ -60,17 +63,19 @@ public class BoardController {
 
     // 글 작성
     @PostMapping
-    public ResponseEntity<Long> insertBoard(@Valid @RequestBody BoardRequestDto boardRequestDto) {
+    public ResponseEntity<Long> insertBoard(@Valid @RequestBody BoardRequestDto boardRequestDto,
+                                            @RequestHeader("Authorization") String adminAccessToken) {
 
-        Long boardId = boardService.insertBoard(boardRequestDto);
+        Long boardId = boardService.insertBoard(boardRequestDto, adminAccessToken);
         return new ResponseEntity<>(boardId, HttpStatus.CREATED);
 
     }
 
     // 글 수정
     @PutMapping("/edit")
-    public ResponseEntity<?> updateBoard(@Valid @RequestBody BoardUpdateRequestDto boardUpdateRequestDto) {
-        Optional<BoardResponseDto> updatedBoardOptional = boardService.updateBoard(boardUpdateRequestDto);
+    public ResponseEntity<?> updateBoard(@Valid @RequestBody BoardUpdateRequestDto boardUpdateRequestDto,
+                                         @RequestHeader("Authorization") String adminAccessToken) {
+        Optional<BoardResponseDto> updatedBoardOptional = boardService.updateBoard(boardUpdateRequestDto, adminAccessToken);
 
         if (updatedBoardOptional.isPresent()) {
             return new ResponseEntity<>(updatedBoardOptional.get(), HttpStatus.OK);
@@ -81,9 +86,10 @@ public class BoardController {
 
     // 글 삭제
     @DeleteMapping("/{bno}")
-    public ResponseEntity<?> deleteBoard(@PathVariable("bno") long bno) {
+    public ResponseEntity<?> deleteBoard(@PathVariable("bno") long bno,
+                                         @RequestHeader("Authorization") String adminAccessToken) {
 
-        boardService.deleteBoard(bno);
+        boardService.deleteBoard(bno, adminAccessToken);
         return new ResponseEntity<>("게시글이 성공적으로 삭제되었습니다.", HttpStatus.OK);
 
     }

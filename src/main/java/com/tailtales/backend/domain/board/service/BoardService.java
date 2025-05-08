@@ -12,16 +12,16 @@ import java.util.Optional;
 
 public interface BoardService {
 
-    Long insertBoard(BoardRequestDto boardRequestDto);
+    Long insertBoard(BoardRequestDto boardRequestDto, String adminAccessToken);
 
-    PageResponseDto<BoardsResponseDto> getBoardList(String sort, PageRequestDto pageRequestDto);
+    PageResponseDto<BoardsResponseDto> getBoardList(String sort, PageRequestDto pageRequestDto, String adminAccessToken);
 
-    PageResponseDto<BoardsResponseDto> getBoardList(String sort, List<Integer> categoryIds, PageRequestDto pageRequestDto);
+    PageResponseDto<BoardsResponseDto> getBoardList(String sort, List<Integer> categoryIds, PageRequestDto pageRequestDto, String adminAccessToken);
 
-    Optional<BoardResponseDto> getBoardInfo(long bno);
+    Optional<BoardResponseDto> getBoardInfo(long bno, String adminAccessToken);
 
-    Optional<BoardResponseDto> updateBoard(BoardUpdateRequestDto boardUpdateRequestDto);
+    Optional<BoardResponseDto> updateBoard(BoardUpdateRequestDto boardUpdateRequestDto, String adminAccessToken);
 
-    void deleteBoard(long bno);
+    void deleteBoard(long bno, String adminAccessToken);
 
 }

@@ -12,11 +12,19 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/admins")
+@RequestMapping("/api/admin")
 @Tag(name = "Admin", description = "Admin API")
 public class AdminController {
 
     private final AdminService adminService;
+
+    // 관리자 토큰 검증
+    @GetMapping("/verify")
+    public Mono<ResponseEntity<String>> verifyToken(@RequestHeader("Authorization") String adminAccessToken) {
+        return adminService.verifyToken(adminAccessToken)
+                .map(ResponseEntity::ok);
+
+    }
 
     // 관리자 회원가입 요청
     @PostMapping

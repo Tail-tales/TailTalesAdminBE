@@ -1,6 +1,5 @@
 package com.tailtales.backend.domain.board.entity;
 
-import com.tailtales.backend.domain.admin.entity.Admin;
 import com.tailtales.backend.domain.category.entity.Category;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -47,9 +46,8 @@ public class Board {
     @Column(name = "is_deleted")
     private boolean isDeleted;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "admin_id")
-    private Admin admin;
+    @Column(name = "member_id")
+    private String memberId;
 
     @ManyToMany
     @JoinTable(
