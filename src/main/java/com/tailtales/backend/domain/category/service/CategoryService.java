@@ -8,12 +8,12 @@ import java.util.List;
 
 public interface CategoryService {
 
-    Integer insertCategory(CategoryRequestDto categoryRequestDto);
+    Integer insertCategory(CategoryRequestDto categoryRequestDto, String adminAccessToken);
 
-    List<CategoriesResponseDto> getCategoryList();
+    List<CategoriesResponseDto> getCategoryList(String adminAccessToken);
 
-    Integer updateCategory(Integer bcno, CategoryUpdateRequestDto categoryUpdateRequestDto);
+    Integer updateCategory(Integer bcno, CategoryUpdateRequestDto categoryUpdateRequestDto, String adminAccessToken);
 
-    Integer deleteCategory(Integer bcno);
+    Integer deleteCategory(Integer bcno, String adminAccessToken);
 
 }

@@ -28,7 +28,7 @@ public class AdminController {
 
     // 관리자 회원가입 요청
     @PostMapping
-    public Mono<ResponseEntity<String>> signupAdmin(@RequestBody AdminInsertRequestDto requestDto) {
+    public Mono<ResponseEntity<String>> insertAdmin(@RequestBody AdminInsertRequestDto requestDto) {
         return adminService.insertAdmin(requestDto)
                 .map(ResponseEntity::ok);
     }

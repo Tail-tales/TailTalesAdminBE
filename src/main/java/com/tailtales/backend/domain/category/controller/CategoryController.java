@@ -23,18 +23,19 @@ public class CategoryController {
 
     // 카테고리 생성
     @PostMapping
-    public ResponseEntity<Integer> insertCategory(@Valid @RequestBody CategoryRequestDto categoryRequestDto) {
+    public ResponseEntity<Integer> insertCategory(@Valid @RequestBody CategoryRequestDto categoryRequestDto,
+                                                  @RequestHeader("Authorization") String adminAccessToken) {
 
-        Integer categoryId = categoryService.insertCategory(categoryRequestDto);
+        Integer categoryId = categoryService.insertCategory(categoryRequestDto, adminAccessToken);
         return new ResponseEntity<>(categoryId, HttpStatus.CREATED);
 
     }
 
     // 카테고리 조회
     @GetMapping("/all")
-    public ResponseEntity<List<CategoriesResponseDto>> getAllCategory() {
+    public ResponseEntity<List<CategoriesResponseDto>> getAllCategory(@RequestHeader("Authorization") String adminAccessToken) {
 
-        List<CategoriesResponseDto> categoryList = categoryService.getCategoryList();
+        List<CategoriesResponseDto> categoryList = categoryService.getCategoryList(adminAccessToken);
         return new ResponseEntity<>(categoryList, HttpStatus.OK);
 
     }
@@ -42,18 +43,20 @@ public class CategoryController {
     // 카테고리 수정
     @PutMapping("/edit/{bcno}")
     public ResponseEntity<Integer> updateCategory(@PathVariable(name = "bcno") Integer bcno,
-                                                  @Valid @RequestBody CategoryUpdateRequestDto categoryUpdateRequestDto) {
+                                                  @Valid @RequestBody CategoryUpdateRequestDto categoryUpdateRequestDto,
+                                                  @RequestHeader("Authorization") String adminAccessToken) {
 
-        Integer categoryId = categoryService.updateCategory(bcno, categoryUpdateRequestDto);
+        Integer categoryId = categoryService.updateCategory(bcno, categoryUpdateRequestDto, adminAccessToken);
         return new ResponseEntity<>(categoryId, HttpStatus.OK);
 
     }
 
     // 카테고리 삭제
     @DeleteMapping("/{bcno}")
-    public ResponseEntity<Integer> deleteCategory(@PathVariable(name = "bcno") Integer bcno) {
+    public ResponseEntity<Integer> deleteCategory(@PathVariable(name = "bcno") Integer bcno,
+                                                  @RequestHeader("Authorization") String adminAccessToken) {
 
-        Integer categoryId = categoryService.deleteCategory(bcno);
+        Integer categoryId = categoryService.deleteCategory(bcno, adminAccessToken);
         return new ResponseEntity<>(categoryId, HttpStatus.OK);
 
     }

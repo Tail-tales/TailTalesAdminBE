@@ -1,5 +1,6 @@
 package com.tailtales.backend.domain.category.service.impl;
 
+import com.tailtales.backend.domain.admin.service.AdminService;
 import com.tailtales.backend.domain.category.dto.CategoriesResponseDto;
 import com.tailtales.backend.domain.category.dto.CategoryRequestDto;
 import com.tailtales.backend.domain.category.dto.CategoryUpdateRequestDto;
@@ -18,10 +19,14 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
 
+    private final AdminService adminService;
     private final CategoryRepository categoryRepository;
 
     @Override
-    public Integer insertCategory(CategoryRequestDto categoryRequestDto) {
+    public Integer insertCategory(CategoryRequestDto categoryRequestDto, String adminAccessToken) {
+
+        adminService.verifyToken(adminAccessToken).block();
+
         Category parentCategory = null;
         int depth = 0;
 
@@ -46,7 +51,9 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoriesResponseDto> getCategoryList() {
+    public List<CategoriesResponseDto> getCategoryList(String adminAccessToken) {
+
+        adminService.verifyToken(adminAccessToken).block();
 
         List<Category> categories = categoryRepository.findAllNotDeletedOrderByDepthAndParentBcno();
         return categories.stream()
@@ -61,7 +68,9 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Integer updateCategory(Integer bcno, CategoryUpdateRequestDto categoryUpdateRequestDto) {
+    public Integer updateCategory(Integer bcno, CategoryUpdateRequestDto categoryUpdateRequestDto, String adminAccessToken) {
+
+        adminService.verifyToken(adminAccessToken).block();
 
         Category existingCategory = categoryRepository.findByBcnoAndIsNotDeleted(bcno)
                 .orElseThrow(() -> new IllegalArgumentException("삭제되었거나 존재하지 않는 카테고리 ID입니다."));
@@ -89,7 +98,9 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Integer deleteCategory(Integer bcno) {
+    public Integer deleteCategory(Integer bcno, String adminAccessToken) {
+
+        adminService.verifyToken(adminAccessToken).block();
 
         Category existingCategory = categoryRepository.findByBcnoAndIsNotDeleted(bcno)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리 입니다. bcno: " + bcno));

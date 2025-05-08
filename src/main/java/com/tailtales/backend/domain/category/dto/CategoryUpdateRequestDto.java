@@ -12,8 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CategoryUpdateRequestDto {
 
-    private int bcno;
-
     @NotBlank
     private String name;
 
